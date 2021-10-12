@@ -18,13 +18,13 @@ dependencies {
     implementation ('com.netflix.conductor:conductor-common:3.0.6') {
         exclude group: 'com.github.vmg.protogen', module: 'protogen-annotations'
     }
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.14.1'
     implementation 'org.springframework.boot:spring-boot-starter'
+    compileOnly 'org.projectlombok:lombok:1.18.22'
+    annotationProcessor 'org.projectlombok:lombok:1.18.22'
 
+    testCompileOnly 'org.projectlombok:lombok:1.18.22'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
-
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }
 
 test {
