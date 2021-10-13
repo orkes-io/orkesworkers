@@ -22,6 +22,7 @@ public class SimpleWorker implements Worker {
         String currentTimeOnServer = Instant.now().toString();
         result.log("This is a test log at time: " + currentTimeOnServer);
         result.addOutputData("currentTimeOnServer", currentTimeOnServer);
+        result.addOutputData("message", "Hello World!");
         return result;
     }
 
