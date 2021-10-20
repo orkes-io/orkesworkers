@@ -12,13 +12,14 @@ repositories {
 }
 
 dependencies {
-    implementation ('com.netflix.conductor:conductor-client:3.0.6') {
+    implementation ('com.netflix.conductor:conductor-client:3.3.1') {
         exclude group: 'com.github.vmg.protogen', module: 'protogen-annotations'
     }
-    implementation ('com.netflix.conductor:conductor-common:3.0.6') {
+    implementation ('com.netflix.conductor:conductor-common:3.3.1') {
         exclude group: 'com.github.vmg.protogen', module: 'protogen-annotations'
     }
     implementation 'org.springframework.boot:spring-boot-starter'
+
     compileOnly 'org.projectlombok:lombok:1.18.22'
     annotationProcessor 'org.projectlombok:lombok:1.18.22'
 
