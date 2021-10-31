@@ -17,6 +17,8 @@ import org.im4java.core.IMOperation;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.UUID;
@@ -32,6 +34,8 @@ public class ImageConvertResizeWorker implements Worker {
     @Override
     public TaskResult execute(Task task) {
 
+        TaskResult result = new TaskResult(task);
+
         try {
             String fileLocation = (String) task.getInputData().get("fileLocation");
             Integer width = (Integer) task.getInputData().get("outputWidth");
@@ -40,19 +44,20 @@ public class ImageConvertResizeWorker implements Worker {
             String outputFileName = "/tmp/" + UUID.randomUUID().toString() + ".png";
             String s3BucketName = "image-processing-sandbox";
 
-            //resizeImage(fileLocation, width, height, outputFileName);
-//            vibrant(fileLocation, 3, outputFileName);
-            //sepia(fileLocation, 80.0, outputFileName);
-            S3Utils.uploadtToS3(outputFileName, Regions.US_EAST_1, s3BucketName);
+            resizeImage(fileLocation, width, height, outputFileName);
+            String url = S3Utils.uploadtToS3(outputFileName, Regions.US_EAST_1, s3BucketName);
+            result.setStatus(TaskResult.Status.COMPLETED);
+            String currentTimeOnServer = Instant.now().toString();
+            result.addOutputData("outputLocation", url);
+
         } catch (Exception e) {
             e.printStackTrace();
+            result.setStatus(TaskResult.Status.FAILED);
+            final StringWriter sw = new StringWriter();
+            final PrintWriter pw = new PrintWriter(sw, true);
+            e.printStackTrace(pw);
+            result.log(sw.getBuffer().toString());
         }
-        TaskResult result = new TaskResult(task);
-        result.setStatus(TaskResult.Status.COMPLETED);
-        String currentTimeOnServer = Instant.now().toString();
-        result.log("This is a test log at time: " + currentTimeOnServer);
-        result.addOutputData("currentTimeOnServer", currentTimeOnServer);
-        result.addOutputData("message", "Hello World!");
         return result;
     }
 
