@@ -1,0 +1,68 @@
+package io.orkes.samples.workers;
+
+import java.util.Map;
+
+import static java.util.Map.entry;
+
+public class Constants {
+
+    static Map<String, String> STATE_CODES = Map.<String, String>ofEntries(
+            entry("Alabama", "AL"),
+            entry("Alaska", "AK"),
+            entry("Arizona", "AZ"),
+            entry("Arkansas", "AR"),
+            entry("California", "CA"),
+            entry("Colorado", "CO"),
+            entry("Connecticut", "CT"),
+            entry("Delaware", "DE"),
+            entry("District of Columbia", "DC"),
+            entry("Florida", "FL"),
+            entry("Georgia", "GA"),
+            entry("Hawaii", "HI"),
+            entry("Idaho", "ID"),
+            entry("Illinois", "IL"),
+            entry("Indiana", "IN"),
+            entry("Iowa", "IA"),
+            entry("Kansas", "KS"),
+            entry("Kentucky", "KY"),
+            entry("Louisiana", "LA"),
+            entry("Maine", "ME"),
+            entry("Maryland", "MD"),
+            entry("Massachusetts", "MA"),
+            entry("Michigan", "MI"),
+            entry("Minnesota", "MN"),
+            entry("Mississippi", "MS"),
+            entry("Missouri", "MO"),
+            entry("Montana", "MT"),
+            entry("Nebraska", "NE"),
+            entry("Nevada", "NV"),
+            entry("New Hampshire", "NH"),
+            entry("New Jersey", "NJ"),
+            entry("New Mexico", "NM"),
+            entry("New York", "NY"),
+            entry("North Carolina", "NC"),
+            entry("North Dakota", "ND"),
+            entry("Ohio", "OH"),
+            entry("Oklahoma", "OK"),
+            entry("Oregon", "OR"),
+            entry("Pennsylvania", "PA"),
+            entry("Rhode Island", "RI"),
+            entry("South Carolina", "SC"),
+            entry("South Dakota", "SD"),
+            entry("Tennessee", "TN"),
+            entry("Texas", "TX"),
+            entry("Utah", "UT"),
+            entry("Vermont", "VT"),
+            entry("Virginia", "VA"),
+            entry("Washington", "WA"),
+            entry("West Virginia", "WV"),
+            entry("Wisconsin", "WI"),
+            entry("Wyoming", "WY"),
+            entry("American Samoa", "AS"),
+            entry("Guam", "GU"),
+            entry("Northern Mariana Islands", "MP"),
+            entry("Puerto Rico", "PR"),
+            entry("U.S. Minor Outlying Islands", "UM"),
+            entry("U.S. Virgin Islands", "VI")
+    );
+}
