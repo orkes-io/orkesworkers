@@ -1,0 +1,24 @@
+{
+  "name": "image_convert_resize",
+  "retryCount": 3,
+  "timeoutSeconds": 1200,
+  "pollTimeoutSeconds": 3600,
+  "inputKeys": [
+    "fileLocation",
+    "outputFormat",
+    "outputWidth",
+    "outputHeight",
+    "maintainAspectRatio"
+  ],
+  "outputKeys": [
+    "fileLocation"
+  ],
+  "timeoutPolicy": "TIME_OUT_WF",
+  "retryLogic": "FIXED",
+  "retryDelaySeconds": 600,
+  "responseTimeoutSeconds": 1000,
+  "concurrentExecLimit": 100,
+  "rateLimitFrequencyInSeconds": 60,
+  "rateLimitPerFrequency": 50,
+  "ownerEmail": "encode_admin@test.com"
+}

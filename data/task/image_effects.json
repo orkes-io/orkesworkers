@@ -1,0 +1,20 @@
+{
+  "name": "image_effects",
+  "retryCount": 3,
+  "timeoutSeconds": 1200,
+  "pollTimeoutSeconds": 3600,
+  "inputKeys": [
+    "effectsParamsList"
+  ],
+  "outputKeys": [
+    "fileLocation"
+  ],
+  "timeoutPolicy": "TIME_OUT_WF",
+  "retryLogic": "FIXED",
+  "retryDelaySeconds": 600,
+  "responseTimeoutSeconds": 3600,
+  "concurrentExecLimit": 100,
+  "rateLimitFrequencyInSeconds": 60,
+  "rateLimitPerFrequency": 50,
+  "ownerEmail": "encode_admin@test.com"
+}
