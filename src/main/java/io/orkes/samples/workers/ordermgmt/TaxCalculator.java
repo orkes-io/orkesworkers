@@ -22,8 +22,12 @@ public class TaxCalculator implements Worker {
             task.setStatus(Task.Status.FAILED);
             task.setReasonForIncompletion("missing zip code");
         }
-        double amount = (double)task.getInputData().get("amount");
-        BigDecimal tax = new BigDecimal(amount).multiply(new BigDecimal(0.1));      //10% tax
+        Number amount = (Number)task.getInputData().get("amount");
+        if(amount == null) {
+            task.setStatus(Task.Status.FAILED);
+            task.setReasonForIncompletion("missing amount");
+        }
+        BigDecimal tax = new BigDecimal(amount.doubleValue()).multiply(new BigDecimal(0.1));      //10% tax
         task.getOutputData().put("tax", tax);
         task.setStatus(Task.Status.COMPLETED);
         return new TaskResult(task);
