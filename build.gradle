@@ -22,11 +22,10 @@ dependencies {
 
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.im4java:im4java:1.4.0'
-
     implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.1000')
     implementation 'com.amazonaws:aws-java-sdk-s3'
-
-    implementation("com.google.guava:guava:31.0.1-jre")
+    implementation 'com.google.guava:guava:31.0.1-jre'
+    implementation 'org.apache.commons:commons-lang3'
 
     compileOnly 'org.projectlombok:lombok:1.18.22'
     annotationProcessor 'org.projectlombok:lombok:1.18.22'
@@ -38,4 +37,10 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+configurations {
+    all {
+        exclude group: 'org.apache.logging.log4j'
+    }
 }
