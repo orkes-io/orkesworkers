@@ -36,7 +36,7 @@ public class ImageConvertResizeWorker implements Worker {
             String s3BucketName = "image-processing-sandbox";
 
             resizeImage(fileLocation, width, height, outputFileName);
-            String url = S3Utils.uploadtToS3(outputFileName, Regions.US_EAST_1, s3BucketName);
+            String url = S3Utils.uploadToS3(outputFileName, Regions.US_EAST_1, s3BucketName);
             result.setStatus(TaskResult.Status.COMPLETED);
             String currentTimeOnServer = Instant.now().toString();
             result.addOutputData("outputLocation", url);
