@@ -12,15 +12,16 @@ repositories {
 }
 
 dependencies {
-    implementation ('com.netflix.conductor:conductor-client:3.3.1') {
+    implementation('com.netflix.conductor:conductor-client:3.3.1') {
         exclude group: 'com.github.vmg.protogen', module: 'protogen-annotations'
     }
-    implementation ('com.netflix.conductor:conductor-common:3.3.1') {
+
+    implementation('com.netflix.conductor:conductor-common:3.3.1') {
         exclude group: 'com.github.vmg.protogen', module: 'protogen-annotations'
     }
 
     implementation 'org.springframework.boot:spring-boot-starter'
-    implementation group: 'org.im4java', name: 'im4java', version: '1.4.0'
+    implementation 'org.im4java:im4java:1.4.0'
 
     implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.1000')
     implementation 'com.amazonaws:aws-java-sdk-s3'
@@ -29,8 +30,6 @@ dependencies {
 
     compileOnly 'org.projectlombok:lombok:1.18.22'
     annotationProcessor 'org.projectlombok:lombok:1.18.22'
-
-
 
     testCompileOnly 'org.projectlombok:lombok:1.18.22'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
