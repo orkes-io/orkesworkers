@@ -5,8 +5,6 @@ import com.netflix.conductor.common.metadata.tasks.Task;
 import com.netflix.conductor.common.metadata.tasks.TaskResult;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
-
 @Component
 public class DHLWorker implements Worker {
 
