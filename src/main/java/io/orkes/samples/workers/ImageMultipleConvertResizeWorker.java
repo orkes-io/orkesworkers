@@ -1,6 +1,5 @@
 package io.orkes.samples.workers;
 
-import com.amazonaws.regions.Regions;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
@@ -9,7 +8,6 @@ import com.netflix.conductor.client.worker.Worker;
 import com.netflix.conductor.common.metadata.tasks.Task;
 import com.netflix.conductor.common.metadata.tasks.TaskResult;
 import com.netflix.conductor.common.metadata.workflow.WorkflowTask;
-import io.orkes.samples.utils.S3Utils;
 import io.orkes.samples.utils.Size;
 import org.im4java.core.ConvertCmd;
 import org.im4java.core.IMOperation;
@@ -18,7 +16,8 @@ import org.springframework.stereotype.Component;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.Instant;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class ImageMultipleConvertResizeWorker implements Worker {

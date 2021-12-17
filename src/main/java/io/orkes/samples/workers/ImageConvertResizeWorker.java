@@ -1,25 +1,16 @@
 package io.orkes.samples.workers;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.SdkClientException;
-import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.regions.Regions;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.google.common.io.Files;
 import com.netflix.conductor.client.worker.Worker;
 import com.netflix.conductor.common.metadata.tasks.Task;
 import com.netflix.conductor.common.metadata.tasks.TaskResult;
 import io.orkes.samples.utils.S3Utils;
-import lombok.SneakyThrows;
 import org.im4java.core.ConvertCmd;
 import org.im4java.core.IMOperation;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -45,7 +36,7 @@ public class ImageConvertResizeWorker implements Worker {
             String s3BucketName = "image-processing-sandbox";
 
             resizeImage(fileLocation, width, height, outputFileName);
-            String url = S3Utils.uploadtToS3(outputFileName, Regions.US_EAST_1, s3BucketName);
+            String url = S3Utils.uploadToS3(outputFileName, Regions.US_EAST_1, s3BucketName);
             result.setStatus(TaskResult.Status.COMPLETED);
             String currentTimeOnServer = Instant.now().toString();
             result.addOutputData("outputLocation", url);

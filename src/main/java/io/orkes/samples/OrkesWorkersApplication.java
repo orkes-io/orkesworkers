@@ -4,7 +4,6 @@ import com.netflix.conductor.client.automator.TaskRunnerConfigurer;
 import com.netflix.conductor.client.http.TaskClient;
 import com.netflix.conductor.client.worker.Worker;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -20,8 +19,11 @@ import java.util.Properties;
 @SpringBootApplication
 public class OrkesWorkersApplication {
 
-    @Autowired
-    private Environment env;
+    private final Environment env;
+
+    public OrkesWorkersApplication(Environment env) {
+        this.env = env;
+    }
 
     public static void main(String[] args) throws IOException {
         loadExternalConfig();
