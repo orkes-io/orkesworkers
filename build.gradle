@@ -4,34 +4,56 @@ plugins {
     id 'java'
 }
 
+ext {
+    appVersion = '1.0-SNAPSHOT'
+    versions = [
+            conductor : '3.3.1',
+            guava     : '31.0.1-jre',
+            im4java   : '1.4.0',
+            log4j     : '2.16.0'
+    ]
+}
+
 group 'io.orkes.samples'
-version '1.0-SNAPSHOT'
+version "${appVersion}"
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation('com.netflix.conductor:conductor-client:3.3.1') {
+    implementation('org.apache.logging.log4j:log4j-api') {
+        version {
+            strictly "${versions.log4j}"
+        }
+    }
+
+    implementation('org.apache.logging.log4j:log4j-to-slf4j') {
+        version {
+            strictly "${versions.log4j}"
+        }
+    }
+
+    implementation("com.netflix.conductor:conductor-client:${versions.conductor}") {
         exclude group: 'com.github.vmg.protogen', module: 'protogen-annotations'
     }
 
-    implementation('com.netflix.conductor:conductor-common:3.3.1') {
+    implementation("com.netflix.conductor:conductor-common:${versions.conductor}") {
         exclude group: 'com.github.vmg.protogen', module: 'protogen-annotations'
     }
 
     implementation 'org.springframework.boot:spring-boot-starter'
-    implementation 'org.im4java:im4java:1.4.0'
+    implementation "org.im4java:im4java:${versions.im4java}"
     implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.1000')
     implementation 'com.amazonaws:aws-java-sdk-s3'
-    implementation 'com.google.guava:guava:31.0.1-jre'
+    implementation "com.google.guava:guava:${versions.guava}"
     implementation 'org.apache.commons:commons-lang3'
 
-    compileOnly 'org.projectlombok:lombok:1.18.22'
-    annotationProcessor 'org.projectlombok:lombok:1.18.22'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
 
-    testCompileOnly 'org.projectlombok:lombok:1.18.22'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
@@ -39,8 +61,3 @@ test {
     useJUnitPlatform()
 }
 
-configurations {
-    all {
-        exclude group: 'org.apache.logging.log4j'
-    }
-}
