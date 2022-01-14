@@ -30,6 +30,6 @@ build
 ./build/
 
 #vs code stuff
-.vscode/settings.json
-bin/main/application.properties
+.vscode/*
+bin/*
 .DS_Store
