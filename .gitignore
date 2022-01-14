@@ -28,3 +28,8 @@ build
 /.idea/
 ./.gradle/
 ./build/
+
+#vs code stuff
+.vscode/settings.json
+bin/main/application.properties
+.DS_Store
