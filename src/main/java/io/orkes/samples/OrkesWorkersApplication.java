@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
+
 @Slf4j
 @SpringBootApplication
 public class OrkesWorkersApplication {
@@ -32,8 +33,8 @@ public class OrkesWorkersApplication {
 
     @Bean
     public TaskRunnerConfigurer taskRunnerConfigurer(List<Worker> workersList) {
-        log.info("Conductor Server URL: {}", env.getProperty("conductor.server.url"));
-        log.info("Starting workers : {}", workersList);
+ //       log.info("Conductor Server URL: {}", env.getProperty("conductor.server.url"));
+ //       log.info("Starting workers : {}", workersList);
         TaskClient taskClient = new TaskClient();
         taskClient.setRootURI(env.getProperty("conductor.server.url"));
         TaskRunnerConfigurer runnerConfigurer = new TaskRunnerConfigurer
