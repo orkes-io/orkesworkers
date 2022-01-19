@@ -1,11 +1,11 @@
 {
-  "name": "image_processing",
-  "description": "Image Processing Workflow",
+  "name": "image_effects",
+  "description": "Image Effects Workflow",
   "version": 1,
   "tasks": [
     {
-      "name": "image_convert_resize",
-      "taskReferenceName": "image_convert_resize_ref",
+      "name": "image_effects",
+      "taskReferenceName": "image_effects_ref",
       "inputParameters": {
         "fileLocation": "${workflow.input.fileLocation}",
         "outputFormat": "${workflow.input.recipeParameters.outputFormat}",

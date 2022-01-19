@@ -1,7 +1,8 @@
-{
+
+  {
   "name": "image_multiple_convert_resize",
   "retryCount": 3,
-  "timeoutSeconds": 1200,
+  "timeoutSeconds": 3600,
   "pollTimeoutSeconds": 3600,
   "inputKeys": [
     "fileLocation",

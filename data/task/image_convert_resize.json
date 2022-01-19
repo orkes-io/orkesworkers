@@ -1,4 +1,5 @@
-{
+
+  {
   "name": "image_convert_resize",
   "retryCount": 3,
   "timeoutSeconds": 1200,
@@ -11,7 +12,7 @@
     "maintainAspectRatio"
   ],
   "outputKeys": [
-    "fileLocation"
+    "outputLocation"
   ],
   "timeoutPolicy": "TIME_OUT_WF",
   "retryLogic": "FIXED",
@@ -21,4 +22,4 @@
   "rateLimitFrequencyInSeconds": 60,
   "rateLimitPerFrequency": 50,
   "ownerEmail": "encode_admin@test.com"
-}
+  }

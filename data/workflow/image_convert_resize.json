@@ -1,5 +1,5 @@
 {
-  "name": "image_processing",
+  "name": "image_convert_resize",
   "description": "Image Processing Workflow",
   "version": 1,
   "tasks": [
@@ -26,7 +26,7 @@
     }
   ],
   "outputParameters": {
-    "fileLocation": "${image_convert_resize_ref.output.fileLocation}"
+    "fileLocation": "${image_convert_resize_ref.output.outputLocation}"
   },
   "schemaVersion": 2,
   "restartable": true,
