@@ -31,16 +31,22 @@ public class ImageConvertResizeWorker implements Worker {
             String fileLocation = (String) task.getInputData().get("fileLocation");
             Integer width = (Integer) task.getInputData().get("outputWidth");
             Integer height = (Integer) task.getInputData().get("outputHeight");
-            String extension = (String) task.getInputData().get("outputFormat");
-           
-            String outputFileName = "/tmp/" + UUID.randomUUID().toString() + "."+ extension;
+
+            String outputFormat = (String) task.getInputData().get("outputFormat");
+
+            String outputFileName = "/tmp/" + UUID.randomUUID().toString() + "."+outputFormat;
+
+
             String s3BucketName = "image-processing-sandbox";
 
             resizeImage(fileLocation, width, height, outputFileName);
-            String url = S3Utils.uploadToS3(outputFileName, Regions.US_EAST_1, s3BucketName);
+
+            //we will not send to S3 here - but output the image path
+            //in the 2nd task, we'll
+            //String url = S3Utils.uploadToS3(outputFileName, Regions.US_EAST_1, s3BucketName);
             result.setStatus(TaskResult.Status.COMPLETED);
             String currentTimeOnServer = Instant.now().toString();
-            result.addOutputData("outputLocation", url);
+            result.addOutputData("fileLocation", outputFileName);
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -10,8 +10,24 @@
         "fileLocation": "${workflow.input.fileLocation}",
         "outputFormat": "${workflow.input.recipeParameters.outputFormat}",
         "outputWidth": "${workflow.input.recipeParameters.outputSize.width}",
-        "outputHeight": "${workflow.input.recipeParameters.outputSize.height}",
-        "maintainAspectRatio": "${workflow.input.recipeParameters.maintainAspectRatio}"
+        "outputHeight": "${workflow.input.recipeParameters.outputSize.height}"
+      },
+      "type": "SIMPLE",
+      "decisionCases": {},
+      "defaultCase": [],
+      "forkTasks": [],
+      "startDelay": 0,
+      "joinOn": [],
+      "optional": false,
+      "defaultExclusiveJoinTask": [],
+      "asyncComplete": false,
+      "loopOver": []
+    },
+    {
+      "name": "image_toS3",
+      "taskReferenceName": "image_toS3_ref",
+      "inputParameters": {
+        "fileLocation": "${image_convert_resize_ref.output.fileLocation}"
       },
       "type": "SIMPLE",
       "decisionCases": {},
@@ -26,12 +42,14 @@
     }
   ],
   "outputParameters": {
-    "fileLocation": "${image_convert_resize_ref.output.outputLocation}"
+
+    "fileLocation": "${image_toS3_ref.output.fileLocation}"
+
   },
   "schemaVersion": 2,
   "restartable": true,
   "workflowStatusListenerEnabled": true,
-  "ownerEmail": "encode_admin@test.com",
+  "ownerEmail": "devrel@orkes.io",
   "timeoutPolicy": "ALERT_ONLY",
   "timeoutSeconds": 0,
   "variables": {},
