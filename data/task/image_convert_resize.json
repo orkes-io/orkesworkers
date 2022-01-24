@@ -1,24 +1,23 @@
 {
   "name": "image_convert_resize",
   "retryCount": 3,
-  "timeoutSeconds": 1200,
-  "pollTimeoutSeconds": 3600,
+  "timeoutSeconds": 30,
+  "pollTimeoutSeconds": 30,
   "inputKeys": [
     "fileLocation",
     "outputFormat",
     "outputWidth",
-    "outputHeight",
-    "maintainAspectRatio"
+    "outputHeight"
   ],
   "outputKeys": [
     "fileLocation"
   ],
   "timeoutPolicy": "TIME_OUT_WF",
   "retryLogic": "FIXED",
-  "retryDelaySeconds": 600,
-  "responseTimeoutSeconds": 1000,
+  "retryDelaySeconds": 30,
+  "responseTimeoutSeconds": 30,
   "concurrentExecLimit": 100,
-  "rateLimitFrequencyInSeconds": 60,
+  "rateLimitFrequencyInSeconds": 30,
   "rateLimitPerFrequency": 50,
-  "ownerEmail": "encode_admin@test.com"
+  "ownerEmail": "devrel@orkes.io"
 }
