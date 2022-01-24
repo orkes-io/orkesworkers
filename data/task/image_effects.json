@@ -1,7 +1,8 @@
-{
+
+  {
   "name": "image_effects",
   "retryCount": 3,
-  "timeoutSeconds": 1200,
+  "timeoutSeconds": 3600,
   "pollTimeoutSeconds": 3600,
   "inputKeys": [
     "effectsParamsList"
@@ -17,4 +18,4 @@
   "rateLimitFrequencyInSeconds": 60,
   "rateLimitPerFrequency": 50,
   "ownerEmail": "encode_admin@test.com"
-}
+  }

@@ -1,5 +1,5 @@
 {
-  "name": "image_processing",
+  "name": "image_convert_resize",
   "description": "Image Processing Workflow",
   "version": 1,
   "tasks": [
@@ -42,7 +42,9 @@
     }
   ],
   "outputParameters": {
+
     "fileLocation": "${image_toS3_ref.output.fileLocation}"
+
   },
   "schemaVersion": 2,
   "restartable": true,

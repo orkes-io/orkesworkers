@@ -1,4 +1,5 @@
-{
+
+  {
   "name": "image_convert_resize",
   "retryCount": 3,
   "timeoutSeconds": 30,
@@ -10,7 +11,7 @@
     "outputHeight"
   ],
   "outputKeys": [
-    "fileLocation"
+    "outputLocation"
   ],
   "timeoutPolicy": "TIME_OUT_WF",
   "retryLogic": "FIXED",
@@ -19,5 +20,7 @@
   "concurrentExecLimit": 100,
   "rateLimitFrequencyInSeconds": 30,
   "rateLimitPerFrequency": 50,
+
   "ownerEmail": "devrel@orkes.io"
 }
+
