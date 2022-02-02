@@ -13,12 +13,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 @Slf4j
 public class LongRunningAsyncTaskWorker implements Worker {
 
     private TaskClient taskClient;
+    private AtomicInteger integer = new AtomicInteger(0);
 
     public LongRunningAsyncTaskWorker(TaskClient taskClient) {
         this.taskClient = taskClient;
@@ -43,21 +45,31 @@ public class LongRunningAsyncTaskWorker implements Worker {
         result.setStatus(TaskResult.Status.IN_PROGRESS);
         result.addOutputData("taskStatus", "STARTED");
         result.setCallbackAfterSeconds(1200);
+        result.getOutputData().clear();
         taskResultsDataStore.put(key, result);
 
         CompletableFuture.runAsync(() -> {
-            for (int i = 0; i < 10; i++) {
-                Uninterruptibles.sleepUninterruptibly(3, TimeUnit.SECONDS);
+
+            if(task.getRetryCount() > 1 && task.getRetryCount() % 3 == 0) {
+                for (int i = 0; i < 10; i++) {
+                    Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
+                    TaskResult taskResult = taskResultsDataStore.get(key);
+                    taskResult.addOutputData("runIt-" + i, "" + Instant.now().toString());
+                    taskResult.setStatus(TaskResult.Status.IN_PROGRESS);
+                    log.info("Updating tasks offline - {}", taskResult);
+                    taskClient.updateTask(taskResult);
+                }
                 TaskResult taskResult = taskResultsDataStore.get(key);
-                taskResult.addOutputData("runIt-" + i, "" + Instant.now().toString());
-                taskResult.setStatus(TaskResult.Status.IN_PROGRESS);
-                log.info("Updating tasks offline - {}", taskResult);
+                taskResult.addOutputData("finalUpdate", "" + Instant.now().toString());
+                taskResult.setCallbackAfterSeconds(0);
+                taskResult.setStatus(TaskResult.Status.COMPLETED);
+                taskClient.updateTask(taskResult);
+            } else {
+                TaskResult taskResult = taskResultsDataStore.get(key);
+                taskResult.addOutputData("failureUpdate-" + integer.incrementAndGet(), "" + Instant.now().toString());
+                taskResult.setStatus(TaskResult.Status.FAILED);
                 taskClient.updateTask(taskResult);
             }
-            TaskResult taskResult = taskResultsDataStore.get(key);
-            taskResult.addOutputData("finalUpdate", "" + Instant.now().toString());
-            taskResult.setStatus(TaskResult.Status.COMPLETED);
-            taskClient.updateTask(taskResult);
         });
 
         log.info("Returning result from main - {}", result);
