@@ -24,8 +24,8 @@
       "loopOver": []
     },
     {
-      "name": "image_toS3",
-      "taskReferenceName": "image_toS3_ref",
+      "name": "upload_toS3",
+      "taskReferenceName": "upload_toS3_ref",
       "inputParameters": {
         "fileLocation": "${image_convert_resize_ref.output.fileLocation}"
       },
@@ -43,7 +43,7 @@
   ],
   "outputParameters": {
 
-    "fileLocation": "${image_toS3_ref.output.fileLocation}"
+    "fileLocation": "${upload_toS3_ref.output.fileLocation}"
 
   },
   "schemaVersion": 2,
