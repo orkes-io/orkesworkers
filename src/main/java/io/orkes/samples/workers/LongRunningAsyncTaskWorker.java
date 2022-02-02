@@ -43,9 +43,9 @@ public class LongRunningAsyncTaskWorker implements Worker {
 
         TaskResult result = new TaskResult(task);
         result.setStatus(TaskResult.Status.IN_PROGRESS);
-        result.addOutputData("taskStatus", "STARTED");
         result.setCallbackAfterSeconds(1200);
         result.getOutputData().clear();
+        result.addOutputData("taskStatus", "STARTED");
         taskResultsDataStore.put(key, result);
 
         CompletableFuture.runAsync(() -> {
