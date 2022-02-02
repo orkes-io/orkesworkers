@@ -54,7 +54,10 @@ public class LongRunningAsyncTaskWorker implements Worker {
                 for (int i = 0; i < 10; i++) {
                     Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
                     TaskResult taskResult = taskResultsDataStore.get(key);
-                    taskResult.addOutputData("runIt-" + i, "" + Instant.now().toString());
+                    String outKey = "runIt-" + i;
+                    String value = Instant.now().toString();
+                    taskResult.addOutputData(outKey, value);
+                    taskResult.log(outKey + " - " + value);
                     taskResult.setStatus(TaskResult.Status.IN_PROGRESS);
                     log.info("Updating tasks offline - {}", taskResult);
                     taskClient.updateTask(taskResult);
