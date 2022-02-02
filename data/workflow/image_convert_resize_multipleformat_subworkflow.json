@@ -1,0 +1,124 @@
+{
+  "updateTime": 1643668873363,
+  "name": "image_convert_resize_multipleformat_subworkflow",
+  "description": "Image Processing Workflow",
+  "version": 1,
+  "tasks": [
+    {
+      "name": "image_convert_resize_multipleformat_fork",
+      "taskReferenceName": "image_convert_resize_multipleformat_ref",
+      "inputParameters": {},
+      "type": "FORK_JOIN",
+      "decisionCases": {},
+      "defaultCase": [],
+      "forkTasks": [
+        [
+          {
+            "name": "image_convert_resize_sub",
+            "taskReferenceName": "subworkflow_jpg_ref",
+            "inputParameters": {
+              "fileLocation": "${workflow.input.fileLocation}",
+              "recipeParameters": {
+                "outputSize": {
+                  "width": "${workflow.input.recipeParameters.outputSize.width}",
+                  "height": "${workflow.input.recipeParameters.outputSize.height}"
+                },
+                "outputFormat": "jpg"
+              }
+            },
+            "type": "SUB_WORKFLOW",
+            "decisionCases": {},
+            "defaultCase": [],
+            "forkTasks": [],
+            "startDelay": 0,
+            "subWorkflowParam": {
+              "name": "image_convert_resize",
+              "version": 1
+            },
+            "joinOn": [],
+            "optional": false,
+            "defaultExclusiveJoinTask": [],
+            "asyncComplete": false,
+            "loopOver": []
+          }
+        ],
+        [
+          {
+            "name": "image_convert_resize",
+            "taskReferenceName": "image_convert_resize_webp_ref",
+            "inputParameters": {
+              "fileLocation": "${workflow.input.fileLocation}",
+              "outputWidth": "${workflow.input.recipeParameters.outputSize.width}",
+              "outputHeight": "${workflow.input.recipeParameters.outputSize.height}",
+              "outputFormat": "webp"
+            },
+            "type": "SIMPLE",
+            "decisionCases": {},
+            "defaultCase": [],
+            "forkTasks": [],
+            "startDelay": 0,
+            "joinOn": [],
+            "optional": false,
+            "defaultExclusiveJoinTask": [],
+            "asyncComplete": false,
+            "loopOver": []
+          },
+          {
+            "name": "upload_toS3",
+            "taskReferenceName": "upload_toS3_webp_ref",
+            "inputParameters": {
+              "fileLocation": "${image_convert_resize_webp_ref.output.fileLocation}"
+            },
+            "type": "SIMPLE",
+            "decisionCases": {},
+            "defaultCase": [],
+            "forkTasks": [],
+            "startDelay": 0,
+            "joinOn": [],
+            "optional": false,
+            "defaultExclusiveJoinTask": [],
+            "asyncComplete": false,
+            "loopOver": []
+          }
+        ]
+      ],
+      "startDelay": 0,
+      "joinOn": [],
+      "optional": false,
+      "defaultExclusiveJoinTask": [],
+      "asyncComplete": false,
+      "loopOver": []
+    },
+    {
+      "name": "image_convert_resize_multipleformat_join",
+      "taskReferenceName": "image_convert_resize_multipleformat_join_ref",
+      "inputParameters": {},
+      "type": "JOIN",
+      "decisionCases": {},
+      "defaultCase": [],
+      "forkTasks": [],
+      "startDelay": 0,
+      "joinOn": [
+        "subworkflow_jpg_ref",
+        "upload_toS3_webp_ref"
+      ],
+      "optional": false,
+      "defaultExclusiveJoinTask": [],
+      "asyncComplete": false,
+      "loopOver": []
+    }
+  ],
+  "inputParameters": [],
+  "outputParameters": {
+    "fileLocationJpg": "${subworkflow_jpg_ref.output.fileLocation}",
+    "fileLocationWebp": "${upload_toS3_webp_ref.output.fileLocation}"
+  },
+  "schemaVersion": 2,
+  "restartable": true,
+  "workflowStatusListenerEnabled": true,
+  "ownerEmail": "devrel@orkes.io",
+  "timeoutPolicy": "ALERT_ONLY",
+  "timeoutSeconds": 0,
+  "variables": {},
+  "inputTemplate": {}
+}

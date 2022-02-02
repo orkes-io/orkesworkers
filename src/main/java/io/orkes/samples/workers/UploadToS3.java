@@ -25,11 +25,11 @@ import java.net.URL;
 
 
 @Component
-public class imageUploadToS3 implements Worker {
+public class UploadToS3 implements Worker {
     private BufferedImage image=null;
     @Override
     public String getTaskDefName() {
-        return "image_toS3";
+        return "upload_toS3";
     }
 
     @Override

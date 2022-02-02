@@ -1,5 +1,5 @@
 {
-"name": "image_toS3",
+"name": "upload_toS3",
 "retryCount": 3,"timeoutSeconds": 30,
 "pollTimeoutSeconds": 30,
 "inputKeys": [

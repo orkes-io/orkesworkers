@@ -1,0 +1,82 @@
+{
+  "name": "image_convert_resize_multipleformat",
+  "description": "Image Processing Workflow",
+  "version": 1,
+  "tasks": [
+    {
+      "name": "image_convert_resize_multipleformat_fork",
+      "taskReferenceName": "image_convert_resize_multipleformat_ref",
+      "type": "FORK_JOIN",
+      "forkTasks":[
+        [
+          
+          {
+            "name": "image_convert_resize",
+            "taskReferenceName":"image_convert_resize_jpg_ref",
+            "inputParameters": {
+              "fileLocation": "${workflow.input.fileLocation}",
+              "outputWidth": "${workflow.input.recipeParameters.outputSize.width}",
+              "outputHeight": "${workflow.input.recipeParameters.outputSize.height}",
+              "outputFormat": "jpg"
+            }
+          },
+          {
+            "name": "upload_toS3",
+            "taskReferenceName": "upload_toS3_jpg_ref",
+            "inputParameters": {
+              "fileLocation": "${image_convert_resize_jpg_ref.output.fileLocation}"
+            }
+
+          }
+        ],
+        [
+          {
+            "name": "image_convert_resize",
+            "taskReferenceName":"image_convert_resize_webp_ref",
+            "inputParameters": {
+              "fileLocation": "${workflow.input.fileLocation}",
+              "outputWidth": "${workflow.input.recipeParameters.outputSize.width}",
+              "outputHeight": "${workflow.input.recipeParameters.outputSize.height}",
+              "outputFormat": "webp"
+            }
+          },
+          {
+            "name": "upload_toS3",
+            "taskReferenceName": "upload_toS3_webp_ref",
+            "inputParameters": {
+              "fileLocation": "${image_convert_resize_webp_ref.output.fileLocation}"
+            }
+
+          }
+
+        ]
+      
+
+
+      ]
+    },
+    {
+      "name": "image_convert_resize_multipleformat_join",
+      "taskReferenceName": "image_convert_resize_multipleformat_join_ref",
+      "type": "JOIN",
+      "joinOn": [
+        "upload_toS3_jpg_ref",
+        "upload_toS3_webp_ref"
+      ]
+    }
+    
+  ],
+  "outputParameters": {
+
+    "fileLocationJpg": "${upload_toS3_jpg_ref.output.fileLocation}",
+    "fileLocationWebp": "${upload_toS3_webp_ref.output.fileLocation}"
+  },
+  "schemaVersion": 2,
+  "restartable": true,
+  "workflowStatusListenerEnabled": true,
+  "ownerEmail": "devrel@orkes.io",
+  "timeoutPolicy": "ALERT_ONLY",
+  "timeoutSeconds": 0,
+  "variables": {},
+  "inputTemplate": {}
+}
