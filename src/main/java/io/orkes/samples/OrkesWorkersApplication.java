@@ -10,6 +10,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.util.ObjectUtils;
+import com.sun.jersey.api.client.ClientHandler;
+import com.sun.jersey.api.client.ClientHandlerException;
+import com.sun.jersey.api.client.ClientRequest;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.config.ClientConfig;
+import com.sun.jersey.api.client.config.DefaultClientConfig;
+import com.sun.jersey.api.client.filter.ClientFilter;
 
 import java.io.IOException;
 import java.util.List;
@@ -19,6 +26,8 @@ import java.util.Properties;
 @Slf4j
 @SpringBootApplication
 public class OrkesWorkersApplication {
+
+    private static final String AUTHORIZATION_HEADER = "X-Authorization";
 
     private final Environment env;
 
@@ -34,7 +43,31 @@ public class OrkesWorkersApplication {
     @Bean
     public TaskClient taskClient() {
         log.info("Conductor Server URL: {}", env.getProperty("conductor.server.url"));
-        TaskClient taskClient = new TaskClient();
+        log.info("Conductor Server URL: {}", env.getProperty("conductor.server.auth.token"));
+        log.info("Starting workers : {}", workersList);
+        String token = env.getProperty("conductor.server.auth.token");
+  
+        
+        //start of added code - see also lines 30 & 48
+
+        ClientFilter filter = new ClientFilter() {
+            @Override
+            public ClientResponse handle(ClientRequest request) throws ClientHandlerException {
+                try {
+                    request.getHeaders().add(AUTHORIZATION_HEADER, token);
+                    return getNext().handle(request);
+                } catch (ClientHandlerException e) {
+                    e.printStackTrace();
+                    throw e;
+                }
+            }
+        };
+        TaskClient taskClient = new TaskClient(new DefaultClientConfig(), (ClientHandler) null, filter);
+        //TaskClient taskClient = new TaskClient();
+
+        //end added code
+
+
         taskClient.setRootURI(env.getProperty("conductor.server.url"));
         return taskClient;
     }
