@@ -41,7 +41,7 @@ public class OrkesWorkersApplication {
     }
 
     @Bean
-    public TaskRunnerConfigurer taskRunnerConfigurer(List<Worker> workersList) {
+    public TaskClient taskClient() {
         log.info("Conductor Server URL: {}", env.getProperty("conductor.server.url"));
         log.info("Conductor Server URL: {}", env.getProperty("conductor.server.auth.token"));
         log.info("Starting workers : {}", workersList);
@@ -67,7 +67,14 @@ public class OrkesWorkersApplication {
 
         //end added code
 
+
         taskClient.setRootURI(env.getProperty("conductor.server.url"));
+        return taskClient;
+    }
+
+    @Bean
+    public TaskRunnerConfigurer taskRunnerConfigurer(List<Worker> workersList, TaskClient taskClient) {
+        log.info("Starting workers : {}", workersList);
         TaskRunnerConfigurer runnerConfigurer = new TaskRunnerConfigurer
                 .Builder(taskClient, workersList)
                 .withThreadCount(Math.max(1, workersList.size()))
