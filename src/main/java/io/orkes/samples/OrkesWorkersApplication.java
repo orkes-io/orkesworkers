@@ -44,7 +44,6 @@ public class OrkesWorkersApplication {
     public TaskClient taskClient() {
         log.info("Conductor Server URL: {}", env.getProperty("conductor.server.url"));
         log.info("Conductor Server URL: {}", env.getProperty("conductor.server.auth.token"));
-        log.info("Starting workers : {}", workersList);
         String token = env.getProperty("conductor.server.auth.token");
   
         
