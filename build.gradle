@@ -48,6 +48,8 @@ dependencies {
     implementation 'com.amazonaws:aws-java-sdk-s3'
     implementation "com.google.guava:guava:${versions.guava}"
     implementation 'org.apache.commons:commons-lang3'
+    implementation 'com.sun.jersey:jersey-client:1.19.4'
+    implementation 'com.google.protobuf:protobuf-java:3.19.4'
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
