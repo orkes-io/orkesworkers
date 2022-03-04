@@ -33,3 +33,6 @@ build
 .vscode/*
 bin/*
 .DS_Store
+
+# app properties can have tokens
+application.properties
