@@ -18,6 +18,9 @@ group 'io.orkes.samples'
 version "${appVersion}"
 
 repositories {
+    maven {
+        url "https://orkes-artifacts-repo.s3.amazonaws.com/releases"
+    }
     mavenCentral()
 }
 
@@ -40,6 +43,11 @@ dependencies {
 
     implementation("com.netflix.conductor:conductor-common:${versions.conductor}") {
         exclude group: 'com.github.vmg.protogen', module: 'protogen-annotations'
+    }
+
+    implementation("io.orkes.conductor:orkes-conductor-client:0.0.1-SNAPSHOT") {
+        exclude group: 'com.github.vmg.protogen', module: 'protogen-annotations'
+        exclude group: 'org.apache.logging.log4j', module: 'log4j-slf4j-impl'
     }
 
     implementation 'org.springframework.boot:spring-boot-starter'

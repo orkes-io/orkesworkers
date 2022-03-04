@@ -34,5 +34,7 @@ build
 bin/*
 .DS_Store
 
-# app properties can have tokens
-*application.properties
+# To have customized local environments
+# e.g. application-local-viren.yml or application-local-vasiliy.properties
+**/application-local-*.yml
+**/application-local-*.properties

@@ -5,7 +5,7 @@ import com.netflix.conductor.common.metadata.tasks.TaskResult;
 import org.springframework.stereotype.Component;
 
 @Component
-public class helloworld implements Worker {
+public class HelloWorld implements Worker {
     @Override
     public String getTaskDefName() {
         return "hello_world";
