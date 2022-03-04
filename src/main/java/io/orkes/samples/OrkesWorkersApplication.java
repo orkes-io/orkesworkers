@@ -3,31 +3,28 @@ package io.orkes.samples;
 import com.netflix.conductor.client.automator.TaskRunnerConfigurer;
 import com.netflix.conductor.client.http.TaskClient;
 import com.netflix.conductor.client.worker.Worker;
+import io.orkes.conductor.client.http.OrkesClient;
+import io.orkes.conductor.client.http.OrkesTaskClient;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.util.ObjectUtils;
-import com.sun.jersey.api.client.ClientHandler;
-import com.sun.jersey.api.client.ClientHandlerException;
-import com.sun.jersey.api.client.ClientRequest;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
-import com.sun.jersey.api.client.filter.ClientFilter;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
-
 @Slf4j
 @SpringBootApplication
 public class OrkesWorkersApplication {
 
-    private static final String AUTHORIZATION_HEADER = "X-Authorization";
+    private static final String CONDUCTOR_SERVER_URL = "conductor.server.url";
+    private static final String CONDUCTOR_CLIENT_KEY_ID = "conductor.security.client.key-id";
+    private static final String CONDUCTOR_CLIENT_SECRET = "conductor.security.client.secret";
 
     private final Environment env;
 
@@ -42,33 +39,30 @@ public class OrkesWorkersApplication {
 
     @Bean
     public TaskClient taskClient() {
-        log.info("Conductor Server URL: {}", env.getProperty("conductor.server.url"));
-        log.info("Conductor Server URL: {}", env.getProperty("conductor.server.auth.token"));
-        String token = env.getProperty("conductor.server.auth.token");
-  
-        
-        //start of added code - see also lines 30 & 48
+        String rootUri = env.getProperty(CONDUCTOR_SERVER_URL);
+        log.info("Conductor Server URL: {}", rootUri);
 
-        ClientFilter filter = new ClientFilter() {
-            @Override
-            public ClientResponse handle(ClientRequest request) throws ClientHandlerException {
-                try {
-                    request.getHeaders().add(AUTHORIZATION_HEADER, token);
-                    return getNext().handle(request);
-                } catch (ClientHandlerException e) {
-                    e.printStackTrace();
-                    throw e;
-                }
-            }
-        };
-        TaskClient taskClient = new TaskClient(new DefaultClientConfig(), (ClientHandler) null, filter);
-        //TaskClient taskClient = new TaskClient();
+        OrkesTaskClient taskClient = new OrkesTaskClient();
+        taskClient.setRootURI(rootUri);
+        setCredentialsIfPresent(taskClient);
 
-        //end added code
-
-
-        taskClient.setRootURI(env.getProperty("conductor.server.url"));
         return taskClient;
+    }
+
+    private void setCredentialsIfPresent(OrkesClient client) {
+        String keyId = env.getProperty(CONDUCTOR_CLIENT_KEY_ID);
+        String secret = env.getProperty(CONDUCTOR_CLIENT_SECRET);
+
+        if ("_CHANGE_ME_".equals(keyId) || "_CHANGE_ME_".equals(secret)) {
+            log.error("Please provide an application key id and secret");
+            System.exit(-1);
+        }
+        if (!StringUtils.isBlank(keyId) && !StringUtils.isBlank(secret)) {
+            log.info("setCredentialsIfPresent: Using authentication with access key '{}'", keyId);
+            client.withCredentials(keyId, secret);
+        } else {
+            log.info("setCredentialsIfPresent: Proceeding without client authentication");
+        }
     }
 
     @Bean
@@ -100,7 +94,7 @@ public class OrkesWorkersApplication {
                 properties.load(resource.getInputStream());
                 properties.forEach((key, value) -> System.setProperty((String) key, (String) value));
                 log.info("Loaded {} properties from {}", properties.size(), configFile);
-            }else {
+            } else {
                 log.warn("Ignoring {} since it does not exist", configFile);
             }
         }
