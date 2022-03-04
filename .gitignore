@@ -35,4 +35,4 @@ bin/*
 .DS_Store
 
 # app properties can have tokens
-application.properties
+/Users/dougsillars/Documents/Github/orkesworkers/src/main/resources/application.properties
