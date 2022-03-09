@@ -7,10 +7,11 @@ plugins {
 ext {
     appVersion = '1.0-SNAPSHOT'
     versions = [
-            conductor : '3.3.1',
-            guava     : '31.0.1-jre',
-            im4java   : '1.4.0',
-            log4j     : '2.17.1'
+            conductor  : '3.5.0',
+            orkesClient: '0.1.4',
+            guava      : '31.0.1-jre',
+            im4java    : '1.4.0',
+            log4j      : '2.17.1'
     ]
 }
 
@@ -18,9 +19,6 @@ group 'io.orkes.samples'
 version "${appVersion}"
 
 repositories {
-    maven {
-        url "https://orkes-artifacts-repo.s3.amazonaws.com/releases"
-    }
     mavenCentral()
 }
 
@@ -39,13 +37,15 @@ dependencies {
 
     implementation("com.netflix.conductor:conductor-client:${versions.conductor}") {
         exclude group: 'com.github.vmg.protogen', module: 'protogen-annotations'
+        exclude group: 'org.apache.logging.log4j', module: 'log4j-slf4j-impl'
     }
 
     implementation("com.netflix.conductor:conductor-common:${versions.conductor}") {
         exclude group: 'com.github.vmg.protogen', module: 'protogen-annotations'
+        exclude group: 'org.apache.logging.log4j', module: 'log4j-slf4j-impl'
     }
 
-    implementation("io.orkes.conductor:orkes-conductor-client:0.0.1-SNAPSHOT") {
+    implementation("io.orkes.conductor:orkes-conductor-client:${versions.orkesClient}") {
         exclude group: 'com.github.vmg.protogen', module: 'protogen-annotations'
         exclude group: 'org.apache.logging.log4j', module: 'log4j-slf4j-impl'
     }
