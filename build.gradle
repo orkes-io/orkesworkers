@@ -7,10 +7,11 @@ plugins {
 ext {
     appVersion = '1.0-SNAPSHOT'
     versions = [
-            conductor : '3.3.1',
-            guava     : '31.0.1-jre',
-            im4java   : '1.4.0',
-            log4j     : '2.17.1'
+            conductor  : '3.5.0',
+            orkesClient: '0.1.4',
+            guava      : '31.0.1-jre',
+            im4java    : '1.4.0',
+            log4j      : '2.17.1'
     ]
 }
 
@@ -18,14 +19,23 @@ group 'io.orkes.samples'
 version "${appVersion}"
 
 repositories {
-    maven {
-        url "https://orkes-artifacts-repo.s3.amazonaws.com/releases"
-    }
     mavenCentral()
 }
 
 dependencies {
     implementation('org.apache.logging.log4j:log4j-api') {
+        version {
+            strictly "${versions.log4j}"
+        }
+    }
+
+    implementation('org.apache.logging.log4j:log4j-core') {
+        version {
+            strictly "${versions.log4j}"
+        }
+    }
+
+    implementation('org.apache.logging.log4j:log4j-jul') {
         version {
             strictly "${versions.log4j}"
         }
@@ -37,18 +47,15 @@ dependencies {
         }
     }
 
-    implementation("com.netflix.conductor:conductor-client:${versions.conductor}") {
-        exclude group: 'com.github.vmg.protogen', module: 'protogen-annotations'
+    implementation('org.apache.logging.log4j:log4j-web') {
+        version {
+            strictly "${versions.log4j}"
+        }
     }
 
-    implementation("com.netflix.conductor:conductor-common:${versions.conductor}") {
-        exclude group: 'com.github.vmg.protogen', module: 'protogen-annotations'
-    }
-
-    implementation("io.orkes.conductor:orkes-conductor-client:0.0.1-SNAPSHOT") {
-        exclude group: 'com.github.vmg.protogen', module: 'protogen-annotations'
-        exclude group: 'org.apache.logging.log4j', module: 'log4j-slf4j-impl'
-    }
+    implementation("com.netflix.conductor:conductor-client:${versions.conductor}")
+    implementation("com.netflix.conductor:conductor-common:${versions.conductor}")
+    implementation("io.orkes.conductor:orkes-conductor-client:${versions.orkesClient}")
 
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation "org.im4java:im4java:${versions.im4java}"
@@ -69,5 +76,12 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+configurations {
+    all {
+        exclude group: 'com.github.vmg.protogen', module: 'protogen-annotations'
+        exclude group: 'org.apache.logging.log4j', module: 'log4j-slf4j-impl'
+    }
 }
 

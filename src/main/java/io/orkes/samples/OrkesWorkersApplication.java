@@ -55,7 +55,7 @@ public class OrkesWorkersApplication {
 
         if ("_CHANGE_ME_".equals(keyId) || "_CHANGE_ME_".equals(secret)) {
             log.error("Please provide an application key id and secret");
-            System.exit(-1);
+            throw new RuntimeException("No Application Key");
         }
         if (!StringUtils.isBlank(keyId) && !StringUtils.isBlank(secret)) {
             log.info("setCredentialsIfPresent: Using authentication with access key '{}'", keyId);
