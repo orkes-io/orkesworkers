@@ -1,27 +1,9 @@
 package io.orkes.samples.workers;
 
-import org.im4java.core.ConvertCmd;
-import org.im4java.core.IMOperation;
-import org.springframework.stereotype.Component;
-
-import javax.imageio.*;
-import lombok.extern.slf4j.Slf4j;
-import com.amazonaws.regions.Regions;
-import com.google.protobuf.compiler.PluginProtos.CodeGeneratorResponse.File;
 import com.netflix.conductor.client.worker.Worker;
 import com.netflix.conductor.common.metadata.tasks.Task;
 import com.netflix.conductor.common.metadata.tasks.TaskResult;
-import io.orkes.samples.utils.S3Utils;
-import java.io.*;
-import java.awt.*;
-import java.awt.image.*;
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
+import org.springframework.stereotype.Component;
 
 
 @Component
@@ -48,8 +30,6 @@ public class WidgetShipping implements Worker {
             String tracking = Integer.toString(eightdigit1) + " " +Integer.toString(eightdigit2);
 
             //magic that creates the label and prints it in the shipping bay
-            
-            
             result.setStatus(TaskResult.Status.COMPLETED);
             result.addOutputData("fullAddress", fullAddress);
             result.addOutputData("trackingNumber", tracking);
