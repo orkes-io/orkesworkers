@@ -1,0 +1,23 @@
+name: Orkes Workers CI for Deployment Webhook
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run a one-line script
+        run: echo This script will call a webhook into our private repo that will trigger the actual CI build
+
+      - name: Invoke the webhook using curl
+        run: |
+          curl -i -XPOST -H "Accept: application/vnd.github.everest-preview+json" -H "Authorization: token ${{ secrets.WEBHOOK_SECRET }}" https://api.github.com/repos/orkes-io/orkesworkers-build/dispatches -d '{"event_type": "webhook"}'
