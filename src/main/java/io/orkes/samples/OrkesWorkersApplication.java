@@ -33,6 +33,7 @@ public class OrkesWorkersApplication {
     }
 
     public static void main(String[] args) throws IOException {
+        log.info("Loading Orkes Demo workers application...");
         loadExternalConfig();
         SpringApplication.run(OrkesWorkersApplication.class, args);
     }
@@ -52,6 +53,8 @@ public class OrkesWorkersApplication {
     private void setCredentialsIfPresent(OrkesClient client) {
         String keyId = env.getProperty(CONDUCTOR_CLIENT_KEY_ID);
         String secret = env.getProperty(CONDUCTOR_CLIENT_SECRET);
+
+        log.info("Conductor Key: {}", keyId);
 
         if ("_CHANGE_ME_".equals(keyId) || "_CHANGE_ME_".equals(secret)) {
             log.error("Please provide an application key id and secret");
@@ -98,6 +101,13 @@ public class OrkesWorkersApplication {
                 log.warn("Ignoring {} since it does not exist", configFile);
             }
         }
+        System.getenv().forEach((k, v) -> {
+            log.info("System Env Props - Key: {}, Value: {}", k, v);
+            if (k.startsWith("conductor")) {
+                log.info("Setting env property to system property: {}", k);
+                System.setProperty(k, v);
+            }
+        });
     }
 
 }
