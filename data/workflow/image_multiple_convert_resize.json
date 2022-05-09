@@ -40,6 +40,11 @@
       "type": "JOIN"
     }
   ],
+  "inputParameters": [
+    "fileLocation",
+    "outputFormats",
+    "outputSizes"
+  ],
   "outputParameters": {
     "fileLocations": "${image_convert_resize_ref.output.fileLocation}"
   },

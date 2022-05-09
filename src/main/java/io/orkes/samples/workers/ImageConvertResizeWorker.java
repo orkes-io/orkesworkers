@@ -41,12 +41,9 @@ public class ImageConvertResizeWorker implements Worker {
 
             resizeImage(fileLocation, width, height, outputFileName);
 
-            //we will not send to S3 here - but output the image path
-            //in the 2nd task, we'll
-            //String url = S3Utils.uploadToS3(outputFileName, Regions.US_EAST_1, s3BucketName);
+            String url = S3Utils.uploadToS3(outputFileName, Regions.US_EAST_1, s3BucketName);
             result.setStatus(TaskResult.Status.COMPLETED);
-            String currentTimeOnServer = Instant.now().toString();
-            result.addOutputData("fileLocation", outputFileName);
+            result.addOutputData("fileLocation", url);
 
         } catch (Exception e) {
             e.printStackTrace();
