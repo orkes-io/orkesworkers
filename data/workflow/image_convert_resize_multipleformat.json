@@ -66,8 +66,11 @@
     }
     
   ],
-  "outputParameters": {
-
+  "inputParameters": [
+    "fileLocation",
+    "recipeParameters"
+  ],
+    "outputParameters": {
     "fileLocationJpg": "${upload_toS3_jpg_ref.output.fileLocation}",
     "fileLocationWebp": "${upload_toS3_webp_ref.output.fileLocation}"
   },
@@ -79,4 +82,4 @@
   "timeoutSeconds": 0,
   "variables": {},
   "inputTemplate": {}
-}
+},
