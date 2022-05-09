@@ -37,7 +37,7 @@ public class ImageConvertResizeWorker implements Worker {
             String outputFileName = "/tmp/" + UUID.randomUUID().toString() + "."+outputFormat;
 
 
-            String s3BucketName = "image-processing-sandbox";
+            String s3BucketName = "image-processing-orkes";
 
             resizeImage(fileLocation, width, height, outputFileName);
 

@@ -2,6 +2,8 @@ package io.orkes.samples.utils;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
+import com.amazonaws.auth.AWSCredentialsProviderChain;
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3Client;
@@ -20,9 +22,11 @@ public class S3Utils {
         try {
             // This code expects that you have AWS credentials set up per:
             // https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html
-            AmazonS3Client s3Client = (AmazonS3Client) AmazonS3ClientBuilder.standard()
-                    .withCredentials(new ProfileCredentialsProvider("orkes-workers"))
+            AWSCredentialsProviderChain awsCredentialsProvider = new DefaultAWSCredentialsProviderChain();
+            AmazonS3Client s3Client = (AmazonS3Client) AmazonS3ClientBuilder
+                    .standard()
                     .withRegion(region)
+                    .withCredentials(awsCredentialsProvider)
                     .build();
 
             // Upload a file as a new object.
