@@ -45,7 +45,9 @@ dependencies {
     implementation "com.google.protobuf:protobuf-java:${versions.protobuf}"
     implementation 'org.apache.commons:commons-lang3'
     implementation platform("com.amazonaws:aws-java-sdk-bom:${versions.awsSdkBom}")
+
     implementation 'com.amazonaws:aws-java-sdk-s3'
+    implementation 'com.amazonaws:aws-java-sdk-sts'
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
