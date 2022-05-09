@@ -4,6 +4,8 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.auth.AWSCredentialsProviderChain;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
+import com.amazonaws.auth.WebIdentityTokenCredentialsProvider;
+import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
@@ -23,7 +25,7 @@ public class S3Utils {
             // This code expects that you have AWS credentials set up per:
             // https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html
 
-            AWSCredentialsProviderChain awsCredentialsProvider = new DefaultAWSCredentialsProviderChain();
+            AWSCredentialsProviderChain awsCredentialsProvider = new AWSCredentialsProviderChain(WebIdentityTokenCredentialsProvider.create());
             AmazonS3 s3Client = AmazonS3ClientBuilder
                     .standard()
                     .withRegion(region)
@@ -47,4 +49,5 @@ public class S3Utils {
 
         return url.toString();
     }
+
 }
