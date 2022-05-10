@@ -27,17 +27,36 @@
       "name": "image_multiple_convert_resize_fork",
       "taskReferenceName": "image_multiple_convert_resize_fork_ref",
       "inputParameters": {
-      "dynamicTasks": "${image_multiple_convert_resize_ref.output.dynamicTasks}",
-      "dynamicTasksInput": "${image_multiple_convert_resize_ref.output.dynamicTasksInput}"
+        "dynamicTasks": "${image_multiple_convert_resize_ref.output.dynamicTasks}",
+        "dynamicTasksInput": "${image_multiple_convert_resize_ref.output.dynamicTasksInput}"
       },
-    "type": "FORK_JOIN_DYNAMIC",
-    "dynamicForkTasksParam": "dynamicTasks",
-    "dynamicForkTasksInputParamName": "dynamicTasksInput"
+      "type": "FORK_JOIN_DYNAMIC",
+      "decisionCases": {},
+      "dynamicForkTasksParam": "dynamicTasks",
+      "dynamicForkTasksInputParamName": "dynamicTasksInput",
+      "defaultCase": [],
+      "forkTasks": [],
+      "startDelay": 0,
+      "joinOn": [],
+      "optional": false,
+      "defaultExclusiveJoinTask": [],
+      "asyncComplete": false,
+      "loopOver": []
     },
     {
       "name": "image_multiple_convert_resize_join",
       "taskReferenceName": "image_multiple_convert_resize_join_ref",
-      "type": "JOIN"
+      "inputParameters": {},
+      "type": "JOIN",
+      "decisionCases": {},
+      "defaultCase": [],
+      "forkTasks": [],
+      "startDelay": 0,
+      "joinOn": [],
+      "optional": false,
+      "defaultExclusiveJoinTask": [],
+      "asyncComplete": false,
+      "loopOver": []
     }
   ],
   "inputParameters": [
@@ -46,12 +65,12 @@
     "outputSizes"
   ],
   "outputParameters": {
-    "fileLocations": "${image_convert_resize_ref.output.fileLocation}"
+    "fileLocations": "${image_multiple_convert_resize_join_ref.output}"
   },
   "schemaVersion": 2,
   "restartable": true,
   "workflowStatusListenerEnabled": true,
-  "ownerEmail": "devrel@orkes.io",
+  "ownerEmail": "jeu@orkes.io",
   "timeoutPolicy": "ALERT_ONLY",
   "timeoutSeconds": 0,
   "variables": {},
