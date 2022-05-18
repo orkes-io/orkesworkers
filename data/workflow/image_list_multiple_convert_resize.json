@@ -1,13 +1,13 @@
 {
-  "name": "image_multiple_convert_resize",
-  "description": "Convert an image to multiple formats and sizes",
+  "name": "image_list_multiple_convert_resize",
+  "description": "Convert a list of images to multiple formats and sizes",
   "version": 1,
   "tasks": [
     {
-      "name": "image_multiple_convert_resize",
-      "taskReferenceName": "image_multiple_convert_resize_ref",
+      "name": "image_list_multiple_convert_resize",
+      "taskReferenceName": "image_list_multiple_convert_resize_ref",
       "inputParameters": {
-        "fileLocation" : "${workflow.input.fileLocation}"
+        "fileLocations": "${workflow.input.fileLocations}",
         "outputFormats": "${workflow.input.outputFormats}",
         "outputSizes": "${workflow.input.outputSizes}",
         "maintainAspectRatio": "${workflow.input.maintainAspectRatio}"
@@ -24,11 +24,11 @@
       "loopOver": []
     },
     {
-      "name": "image_multiple_convert_resize_fork",
-      "taskReferenceName": "image_multiple_convert_resize_fork_ref",
+      "name": "image_list_multiple_convert_resize_fork",
+      "taskReferenceName": "image_list_multiple_convert_resize_fork_ref",
       "inputParameters": {
-        "dynamicTasks": "${image_multiple_convert_resize_ref.output.dynamicTasks}",
-        "dynamicTasksInput": "${image_multiple_convert_resize_ref.output.dynamicTasksInput}"
+        "dynamicTasks": "${image_list_multiple_convert_resize_ref.output.dynamicTasks}",
+        "dynamicTasksInput": "${image_list_multiple_convert_resize_ref.output.dynamicTasksInput}"
       },
       "type": "FORK_JOIN_DYNAMIC",
       "decisionCases": {},
@@ -44,8 +44,8 @@
       "loopOver": []
     },
     {
-      "name": "image_multiple_convert_resize_join",
-      "taskReferenceName": "image_multiple_convert_resize_join_ref",
+      "name": "image_list_multiple_convert_resize_join",
+      "taskReferenceName": "image_list_multiple_convert_resize_join_ref",
       "inputParameters": {},
       "type": "JOIN",
       "decisionCases": {},
@@ -60,12 +60,12 @@
     }
   ],
   "inputParameters": [
-    "fileLocation",
+    "fileLocations",
     "outputFormats",
     "outputSizes"
   ],
   "outputParameters": {
-    "fileLocations": "${image_multiple_convert_resize_join_ref.output}"
+    "fileLocations": "${image_list_multiple_convert_resize_join_ref.output}"
   },
   "schemaVersion": 2,
   "restartable": true,

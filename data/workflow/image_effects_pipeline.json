@@ -1,0 +1,61 @@
+{
+  "name": "image_effects_pipeline",
+  "description": "Apply Image Effects followed by resize and encode to various formats and sizes",
+  "version": 1,
+  "tasks": [
+    {
+      "name": "image_effects",
+      "taskReferenceName": "image_effects_ref",
+      "inputParameters": {
+        "fileLocation": "${workflow.input.fileLocation}"
+      },
+      "type": "SUB_WORKFLOW",
+      "decisionCases": {},
+      "defaultCase": [],
+      "startDelay": 0,
+      "joinOn": [],
+      "optional": false,
+      "defaultExclusiveJoinTask": [],
+      "asyncComplete": false,
+      "loopOver": []
+    },
+    {
+      "name": "image_list_multiple_convert_resize",
+      "taskReferenceName": "image_list_multiple_convert_resize_ref",
+      "inputParameters": {
+        "fileLocations" : "",
+        "tag":
+        "outputFormats",
+        "outputSizes"
+      },
+      "type": "SUB_WORKFLOW",
+      "decisionCases": {},
+      "defaultCase": [],
+      "forkTasks": [],
+      "startDelay": 0,
+      "joinOn": [
+        "image_effect_sepia",
+        "image_effect_vibrant"
+      ],
+      "optional": false,
+      "defaultExclusiveJoinTask": [],
+      "asyncComplete": false,
+      "loopOver": []
+    }
+
+  ],
+  "inputParameters": [
+    "fileLocation"
+  ],
+  "outputParameters": {
+    "fileLocations": "${effects_join_ref.output}"
+  },
+  "schemaVersion": 2,
+  "restartable": true,
+  "workflowStatusListenerEnabled": true,
+  "ownerEmail": "devrel@orkes.io",
+  "timeoutPolicy": "ALERT_ONLY",
+  "timeoutSeconds": 0,
+  "variables": {},
+  "inputTemplate": {}
+}

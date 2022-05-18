@@ -1,0 +1,23 @@
+{
+  "name": "image_list_multiple_convert_resize",
+  "retryCount": 3,
+  "timeoutSeconds": 30,
+  "pollTimeoutSeconds": 30,
+  "inputKeys": [
+    "fileLocations",
+    "outputFormats",
+    "outputSizes"
+  ],
+  "outputKeys": [
+    "dynamicTasks",
+    "dynamicTasksInput"
+  ],
+  "timeoutPolicy": "TIME_OUT_WF",
+  "retryLogic": "FIXED",
+  "retryDelaySeconds": 15,
+  "responseTimeoutSeconds": 30,
+  "concurrentExecLimit": 100,
+  "rateLimitFrequencyInSeconds": 60,
+  "rateLimitPerFrequency": 50,
+  "ownerEmail": "devrel@orkes.io"
+}
