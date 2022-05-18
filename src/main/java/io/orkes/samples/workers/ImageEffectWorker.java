@@ -102,7 +102,7 @@ public class ImageEffectWorker implements Worker {
 
     private RECIPE validateRecipeNames(String recipeName) throws Exception {
         RECIPE recipe = RECIPE.fromString(recipeName);
-        if(supportedRecipes.contains(recipe)) {
+        if(!supportedRecipes.contains(recipe)) {
             throw new Exception("Recipe: " + recipeName + " not supported. Supported recipes: " + supportedRecipes);
         }
         return recipe;

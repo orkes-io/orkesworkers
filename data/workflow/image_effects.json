@@ -85,6 +85,9 @@
     }
 
   ],
+  "inputParameters": [
+    "fileLocation"
+  ],
   "outputParameters": {
     "fileLocations": "${effects_join_ref.output}"
   },
