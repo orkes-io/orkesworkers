@@ -114,7 +114,8 @@ public class ImageEffectWorker implements Worker {
         IMOperation op = new IMOperation();
         op.quiet();
         op.addImage(inputImage);
-        op.sepiaTone(sepiaIntensityThreshold);
+//        op.sepiaTone(sepiaIntensityThreshold);
+        op.addRawArgs("-sepia-tone", sepiaIntensityThreshold.toString()+"%");
         op.addImage(outputImage);
 
         cmd.run(op);

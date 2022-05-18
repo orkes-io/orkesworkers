@@ -19,7 +19,7 @@
               "fileLocation": "${workflow.input.fileLocation}",
               "recipe": "sepia",
               "recipeParameters" : {
-                "sepiaIntensityThreshold": 50.0
+                "sepiaIntensityThreshold": 80.0
               }
             },
             "type": "SIMPLE",
@@ -40,7 +40,7 @@
             "taskReferenceName": "image_effect_vibrant",
             "inputParameters": {
               "fileLocation": "${workflow.input.fileLocation}",
-              "recipe": "sepia",
+              "recipe": "vibrant",
               "recipeParameters" : {
                 "vibrance": 4
               }
