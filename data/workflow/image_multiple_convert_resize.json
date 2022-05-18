@@ -7,7 +7,7 @@
       "name": "image_multiple_convert_resize",
       "taskReferenceName": "image_multiple_convert_resize_ref",
       "inputParameters": {
-        "fileLocation": "${workflow.input.fileLocation}",
+
         "outputFormats": "${workflow.input.outputFormats}",
         "outputSizes": "${workflow.input.outputSizes}",
         "maintainAspectRatio": "${workflow.input.maintainAspectRatio}"
