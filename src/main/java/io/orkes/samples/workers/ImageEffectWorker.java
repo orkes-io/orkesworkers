@@ -88,6 +88,8 @@ public class ImageEffectWorker implements Worker {
             String url = S3Utils.uploadToS3(outputFileName, Regions.US_EAST_1, s3BucketName);
             result.setStatus(TaskResult.Status.COMPLETED);
             result.addOutputData("fileLocation", url);
+            result.addOutputData("recipe", recipe);
+            result.addOutputData("recipeParameters", recipeParameters);
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -44,6 +44,9 @@ public class ImageConvertResizeWorker implements Worker {
             String url = S3Utils.uploadToS3(outputFileName, Regions.US_EAST_1, s3BucketName);
             result.setStatus(TaskResult.Status.COMPLETED);
             result.addOutputData("fileLocation", url);
+            result.addOutputData("outputWidth", width);
+            result.addOutputData("outputHeight", height);
+            result.addOutputData("outputFormat", outputFormat);
 
         } catch (Exception e) {
             e.printStackTrace();
