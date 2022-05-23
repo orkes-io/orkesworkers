@@ -1,0 +1,102 @@
+{
+  "name": "image_effects",
+  "description": "Image Effects Workflow",
+  "version": 1,
+  "tasks": [
+    {
+      "name": "effects_fork",
+      "taskReferenceName": "effects_fork_ref",
+      "inputParameters": {},
+      "type": "FORK_JOIN",
+      "decisionCases": {},
+      "defaultCase": [],
+      "forkTasks": [
+        [
+          {
+            "name": "image_effect",
+            "taskReferenceName": "image_effect_sepia",
+            "inputParameters": {
+              "fileLocation": "${workflow.input.fileLocation}",
+              "recipe": "sepia",
+              "recipeParameters" : {
+                "sepiaIntensityThreshold": 80.0
+              }
+            },
+            "type": "SIMPLE",
+            "decisionCases": {},
+            "defaultCase": [],
+            "forkTasks": [],
+            "startDelay": 0,
+            "joinOn": [],
+            "optional": false,
+            "defaultExclusiveJoinTask": [],
+            "asyncComplete": false,
+            "loopOver": []
+          }
+        ],
+        [
+          {
+            "name": "image_effect",
+            "taskReferenceName": "image_effect_vibrant",
+            "inputParameters": {
+              "fileLocation": "${workflow.input.fileLocation}",
+              "recipe": "vibrant",
+              "recipeParameters" : {
+                "vibrance": 4
+              }
+            },
+            "type": "SIMPLE",
+            "decisionCases": {},
+            "defaultCase": [],
+            "forkTasks": [],
+            "startDelay": 0,
+            "joinOn": [],
+            "optional": false,
+            "defaultExclusiveJoinTask": [],
+            "asyncComplete": false,
+            "loopOver": []
+          }
+        ]
+      ],
+      "startDelay": 0,
+      "joinOn": [],
+      "optional": false,
+      "defaultExclusiveJoinTask": [],
+      "asyncComplete": false,
+      "loopOver": []
+    },
+    {
+      "name": "effects_join",
+      "taskReferenceName": "effects_join_ref",
+      "inputParameters": {},
+      "type": "JOIN",
+      "decisionCases": {},
+      "defaultCase": [],
+      "forkTasks": [],
+      "startDelay": 0,
+      "joinOn": [
+        "image_effect_sepia",
+        "image_effect_vibrant"
+      ],
+      "optional": false,
+      "defaultExclusiveJoinTask": [],
+      "asyncComplete": false,
+      "loopOver": []
+    }
+
+  ],
+  "inputParameters": [
+    "fileLocation"
+  ],
+  "outputParameters": {
+    "fileLocations": "${effects_join_ref.output}"
+  },
+  "schemaVersion": 2,
+  "restartable": true,
+  "workflowStatusListenerEnabled": true,
+  "ownerEmail": "devrel@orkes.io",
+  "timeoutPolicy": "ALERT_ONLY",
+  "timeoutSeconds": 0,
+  "variables": {},
+  "inputTemplate": {}
+}

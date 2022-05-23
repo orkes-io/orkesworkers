@@ -23,10 +23,10 @@
       "name": "image_list_multiple_convert_resize",
       "taskReferenceName": "image_list_multiple_convert_resize_ref",
       "inputParameters": {
-        "fileLocations" : "",
-        "tag":
-        "outputFormats",
-        "outputSizes"
+        "fileLocations": "${effects_join_ref.output.fileLocations}",
+        "tag": "test",
+        "outputFormats": "${workflow.input.fileLocations}",
+        "outputSizes":
       },
       "type": "SUB_WORKFLOW",
       "decisionCases": {},
@@ -45,10 +45,12 @@
 
   ],
   "inputParameters": [
-    "fileLocation"
+    "fileLocations",
+    "outputFormats",
+    "outputSizes"
   ],
   "outputParameters": {
-    "fileLocations": "${effects_join_ref.output}"
+    "fileLocations": "${effects_join_ref.output.fileLocations}"
   },
   "schemaVersion": 2,
   "restartable": true,

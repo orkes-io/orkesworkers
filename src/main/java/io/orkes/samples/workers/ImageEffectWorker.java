@@ -76,7 +76,7 @@ public class ImageEffectWorker implements Worker {
             String outputFileName = "/tmp/" + UUID.randomUUID().toString() + "-" + recipe.name() + "."+fileExtension;
 
             if(recipe == RECIPE.SEPIA) {
-                Double sepiaIntensityThreshold = ((Double) recipeParameters.get("sepiaIntensityThreshold"));
+                Integer sepiaIntensityThreshold = ((Integer) recipeParameters.get("sepiaIntensityThreshold"));
                 sepia(fileLocation, sepiaIntensityThreshold, outputFileName);
             } else if(recipe == RECIPE.VIBRANT) {
                 Integer vibrance = ((Integer) recipeParameters.get("vibrance"));
@@ -108,7 +108,7 @@ public class ImageEffectWorker implements Worker {
         return recipe;
     }
 
-    private void sepia(String inputImage, Double sepiaIntensityThreshold, String outputImage ) throws Exception {
+    private void sepia(String inputImage, Integer sepiaIntensityThreshold, String outputImage ) throws Exception {
         ConvertCmd cmd = new ConvertCmd();
 
         IMOperation op = new IMOperation();
