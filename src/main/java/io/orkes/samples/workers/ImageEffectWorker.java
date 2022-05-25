@@ -7,21 +7,23 @@ import com.netflix.conductor.client.worker.Worker;
 import com.netflix.conductor.common.metadata.tasks.Task;
 import com.netflix.conductor.common.metadata.tasks.TaskResult;
 import io.orkes.samples.utils.S3Utils;
+import org.im4java.core.CompositeCmd;
 import org.im4java.core.ConvertCmd;
 import org.im4java.core.IMOperation;
+import org.im4java.core.ImageMagickCmd;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.EnumSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.Executors;
 
 
 enum RECIPE {
     SEPIA("sepia"),
-    VIBRANT("vibrant")
+    VIBRANT("vibrant"),
+    WATERMARK("watermark")
     ;
 
     private final String recipeName;
@@ -81,6 +83,10 @@ public class ImageEffectWorker implements Worker {
             } else if(recipe == RECIPE.VIBRANT) {
                 Integer vibrance = ((Integer) recipeParameters.get("vibrance"));
                 vibrant(fileLocation, vibrance, outputFileName);
+            } else if(recipe == RECIPE.WATERMARK) {
+                String watermarkFileLocation = ((String) recipeParameters.get("watermarkFileLocation"));
+                String gravity = ((String) recipeParameters.get("gravity"));
+                watermark(fileLocation, watermarkFileLocation, outputFileName, gravity);
             }
 
             String s3BucketName = "image-processing-orkes";
@@ -143,5 +149,27 @@ public class ImageEffectWorker implements Worker {
         op.addImage(outputImage);
 
         cmd.run(op);
+    }
+
+    public void watermark(String inputFileLocation, String watermarkFileLocation, String  outputFileLocation, String gravity )  throws  Exception {
+
+        String cmd = "magick " +
+                        inputFileLocation +
+                        " -set option:logowidth \"%[fx:int(w*0.25)]\" \\( " +
+                        watermarkFileLocation +
+                        " -resize \"%[logowidth]x\" \\) -gravity " +
+                        gravity +
+                        " -geometry +10+10 -composite " +
+                        outputFileLocation;
+
+        ProcessBuilder builder = new ProcessBuilder();
+        builder.command("sh","-c",cmd);
+
+
+        System.out.println(builder.command().toString());
+
+        Process process = builder.start();
+        assert (process.waitFor() >= 0);
+
     }
 }
