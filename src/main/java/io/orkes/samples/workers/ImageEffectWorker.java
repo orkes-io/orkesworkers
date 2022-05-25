@@ -85,7 +85,7 @@ public class ImageEffectWorker implements Worker {
                 vibrant(fileLocation, vibrance, outputFileName);
             } else if(recipe == RECIPE.WATERMARK) {
                 String watermarkFileLocation = ((String) recipeParameters.get("watermarkFileLocation"));
-                String gravity = ((String) recipeParameters.get("watermark"));
+                String gravity = ((String) recipeParameters.get("gravity"));
                 watermark(fileLocation, watermarkFileLocation, outputFileName, gravity);
             }
 
@@ -122,7 +122,6 @@ public class ImageEffectWorker implements Worker {
         IMOperation op = new IMOperation();
         op.quiet();
         op.addImage(inputImage);
-//        op.sepiaTone(sepiaIntensityThreshold);
         op.addRawArgs("-sepia-tone", sepiaIntensityThreshold.toString()+"%");
         op.addImage(outputImage);
 
@@ -164,9 +163,6 @@ public class ImageEffectWorker implements Worker {
 
         ProcessBuilder builder = new ProcessBuilder();
         builder.command("sh","-c",cmd);
-
-
-        System.out.println(builder.command().toString());
 
         Process process = builder.start();
         assert (process.waitFor() >= 0);
