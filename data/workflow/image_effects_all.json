@@ -19,7 +19,7 @@
               "fileLocation": "${workflow.input.fileLocation}",
               "recipe": "sepia",
               "recipeParameters" : {
-                "sepiaIntensityThreshold": 80.0
+                "sepiaIntensityThreshold": 80
               }
             },
             "type": "SIMPLE",
