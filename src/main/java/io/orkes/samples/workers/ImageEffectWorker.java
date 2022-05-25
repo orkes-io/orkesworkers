@@ -85,7 +85,7 @@ public class ImageEffectWorker implements Worker {
                 vibrant(fileLocation, vibrance, outputFileName);
             } else if(recipe == RECIPE.WATERMARK) {
                 String watermarkFileLocation = ((String) recipeParameters.get("watermarkFileLocation"));
-                String gravity = ((String) recipeParameters.get("gravity"));
+                String gravity = ((String) recipeParameters.get("watermark"));
                 watermark(fileLocation, watermarkFileLocation, outputFileName, gravity);
             }
 

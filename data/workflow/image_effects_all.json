@@ -1,6 +1,6 @@
 {
-  "name": "image_effects",
-  "description": "Image Effects Workflow",
+  "name": "image_effects_all",
+  "description": "Demo of all Image Effects Workflow",
   "version": 1,
   "tasks": [
     {
