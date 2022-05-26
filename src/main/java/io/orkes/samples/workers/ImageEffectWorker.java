@@ -162,7 +162,7 @@ public class ImageEffectWorker implements Worker {
                         outputFileLocation;
 
         ProcessBuilder builder = new ProcessBuilder();
-        builder.command("sh","-c",cmd);
+        builder.command("sh","-c","which magick");
 
         Process process = builder.start();
         String output = loadStream(process.getInputStream());
