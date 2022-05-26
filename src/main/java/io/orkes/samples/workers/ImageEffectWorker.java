@@ -152,7 +152,7 @@ public class ImageEffectWorker implements Worker {
 
     public String watermark(String inputFileLocation, String watermarkFileLocation, String  outputFileLocation, String gravity )  throws  Exception {
 
-        String cmd = "magick " +
+        String cmd = "/usr/local/bin/magick " +
                         inputFileLocation +
                         " -set option:logowidth \"%[fx:int(w*0.25)]\" \\( " +
                         watermarkFileLocation +
