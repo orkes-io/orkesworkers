@@ -14,8 +14,7 @@ import org.im4java.core.ImageMagickCmd;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.Executors;
 
@@ -86,7 +85,8 @@ public class ImageEffectWorker implements Worker {
             } else if(recipe == RECIPE.WATERMARK) {
                 String watermarkFileLocation = ((String) recipeParameters.get("watermarkFileLocation"));
                 String gravity = ((String) recipeParameters.get("gravity"));
-                watermark(fileLocation, watermarkFileLocation, outputFileName, gravity);
+                String message = watermark(fileLocation, watermarkFileLocation, outputFileName, gravity);
+                result.log(message);
             }
 
             String s3BucketName = "image-processing-orkes";
@@ -150,7 +150,7 @@ public class ImageEffectWorker implements Worker {
         cmd.run(op);
     }
 
-    public void watermark(String inputFileLocation, String watermarkFileLocation, String  outputFileLocation, String gravity )  throws  Exception {
+    public String watermark(String inputFileLocation, String watermarkFileLocation, String  outputFileLocation, String gravity )  throws  Exception {
 
         String cmd = "magick " +
                         inputFileLocation +
@@ -165,7 +165,22 @@ public class ImageEffectWorker implements Worker {
         builder.command("sh","-c",cmd);
 
         Process process = builder.start();
-        assert (process.waitFor() >= 0);
+        String output = loadStream(process.getInputStream());
+        String error  = loadStream(process.getErrorStream());
+        int rc = process.waitFor();
+        if(rc != 0) {
+            throw new Exception(error);
+        }
+        return output;
+    }
 
+    private static String loadStream(InputStream s) throws Exception
+    {
+        BufferedReader br = new BufferedReader(new InputStreamReader(s));
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while((line=br.readLine()) != null)
+            sb.append(line).append("\n");
+        return sb.toString();
     }
 }
