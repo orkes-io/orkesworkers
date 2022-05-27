@@ -1,22 +1,21 @@
 package io.orkes.samples.workers;
 
 import com.amazonaws.regions.Regions;
-import com.google.common.collect.Sets;
 import com.google.common.io.Files;
+import com.google.common.primitives.Doubles;
 import com.netflix.conductor.client.worker.Worker;
 import com.netflix.conductor.common.metadata.tasks.Task;
 import com.netflix.conductor.common.metadata.tasks.TaskResult;
 import io.orkes.samples.utils.S3Utils;
-import org.im4java.core.CompositeCmd;
 import org.im4java.core.ConvertCmd;
 import org.im4java.core.IMOperation;
-import org.im4java.core.ImageMagickCmd;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.io.*;
-import java.util.*;
-import java.util.concurrent.Executors;
+import java.util.EnumSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 
 enum RECIPE {
@@ -77,16 +76,15 @@ public class ImageEffectWorker implements Worker {
             String outputFileName = "/tmp/" + UUID.randomUUID().toString() + "-" + recipe.name() + "."+fileExtension;
 
             if(recipe == RECIPE.SEPIA) {
-                Integer sepiaIntensityThreshold = ((Integer) recipeParameters.get("sepiaIntensityThreshold"));
+                Integer sepiaIntensityThreshold = Doubles.tryParse(recipeParameters.get("sepiaIntensityThreshold").toString()).intValue();
                 sepia(fileLocation, sepiaIntensityThreshold, outputFileName);
             } else if(recipe == RECIPE.VIBRANT) {
-                Integer vibrance = ((Integer) recipeParameters.get("vibrance"));
+                Integer vibrance = Doubles.tryParse(recipeParameters.get("vibrance").toString()).intValue();
                 vibrant(fileLocation, vibrance, outputFileName);
             } else if(recipe == RECIPE.WATERMARK) {
                 String watermarkFileLocation = ((String) recipeParameters.get("watermarkFileLocation"));
                 String gravity = ((String) recipeParameters.get("gravity"));
-                String message = watermark(fileLocation, watermarkFileLocation, outputFileName, gravity);
-                result.log(message);
+                watermark(fileLocation, watermarkFileLocation, outputFileName, gravity);
             }
 
             String s3BucketName = "image-processing-orkes";
@@ -150,28 +148,29 @@ public class ImageEffectWorker implements Worker {
         cmd.run(op);
     }
 
-    public String watermark(String inputFileLocation, String watermarkFileLocation, String  outputFileLocation, String gravity )  throws  Exception {
+    public void watermark(String inputFileLocation, String watermarkFileLocation, String  outputFileLocation, String gravity )  throws  Exception {
 
-        String cmd = "/usr/bin/magick " +
+        String cmd = "convert " +
                         inputFileLocation +
-                        " -set option:logowidth \"%[fx:int(w*0.25)]\" \\( " +
-                        watermarkFileLocation +
-                        " -resize \"%[logowidth]x\" \\) -gravity " +
+                " " +
+                watermarkFileLocation +
+                " +distort affine \"0,0 0,0 %[w],%[h] %[fx:t?v.w*(u.h/v.h*0.1):s.w],%[fx:t?v.h*(u.h/v.h*0.1):s.h]\"" +
+                        "  -shave 1 -gravity " +
                         gravity +
                         " -geometry +10+10 -composite " +
                         outputFileLocation;
 
         ProcessBuilder builder = new ProcessBuilder();
-        builder.command("sh","-c",cmd);
+        builder.command("sh", "-c", cmd);
 
         Process process = builder.start();
         String output = loadStream(process.getInputStream());
         String error  = loadStream(process.getErrorStream());
+
         int rc = process.waitFor();
         if(rc != 0) {
             throw new Exception(error);
         }
-        return output;
     }
 
     private static String loadStream(InputStream s) throws Exception
