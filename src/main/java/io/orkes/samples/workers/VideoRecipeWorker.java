@@ -53,7 +53,7 @@ public class VideoRecipeWorker implements Worker {
 
     @Override
     public String getTaskDefName() {
-        return "video_recipe";
+        return "video_recipes";
     }
 
 
