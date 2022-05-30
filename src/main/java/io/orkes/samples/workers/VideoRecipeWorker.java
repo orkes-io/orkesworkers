@@ -19,7 +19,8 @@ import java.util.*;
 enum VIDEO_RECIPE {
     THUMBNAIL_GENERATE("thumbnail_generate"),
     SCENE_DETECT("scene_detect"),
-    WATERMARK("watermark")
+    WATERMARK("watermark"),
+    TRANSCODE("transcode"),
     ;
 
     private final String recipeName;
@@ -78,6 +79,22 @@ public class VideoRecipeWorker implements Worker {
                 String watermarkFileLocation = ((String) recipeParameters.get("watermarkFileLocation"));
 //                String gravity = ((String) recipeParameters.get("gravity"));
                 watermark(fileLocation, watermarkFileLocation, outputFileName);
+            } else if(recipe == VIDEO_RECIPE.TRANSCODE) {
+                String videoEncoder = ((String) recipeParameters.get("videoEncoder"));
+                Integer videoBitRate = Doubles.tryParse(recipeParameters.get("videoBitRate").toString()).intValue();
+                Integer frameRate = Doubles.tryParse(recipeParameters.get("frameRate").toString()).intValue();
+                String audioEncoder = ((String) recipeParameters.get("audioEncoder"));
+                Integer audioBitRate = Doubles.tryParse(recipeParameters.get("audioBitRate").toString()).intValue();
+                Integer audioSamplingFrequency = Doubles.tryParse(recipeParameters.get("audioSamplingFrequency").toString()).intValue();
+
+                transcode(fileLocation,
+                        videoEncoder,
+                        videoBitRate,
+                        frameRate,
+                        audioEncoder,
+                        audioBitRate,
+                        audioSamplingFrequency,
+                        outputFileName);
             }
 
             String s3BucketName = "image-processing-orkes";
@@ -110,7 +127,7 @@ public class VideoRecipeWorker implements Worker {
 
     public void watermark(String inputFileLocation, String watermarkFileLocation, String  outputFileLocation )  throws  Exception {
 
-        String cmd = "/usr/local/bin/ffmpeg -i " +
+        String cmd = "ffmpeg -i " +
                         inputFileLocation +
                         " -i " +
                         watermarkFileLocation +
@@ -122,6 +139,46 @@ public class VideoRecipeWorker implements Worker {
         builder.command("sh", "-c", cmd);
 
         Process process = builder.start();
+        String error  = loadStream(process.getErrorStream());
+
+        int rc = process.waitFor();
+        if(rc != 0) {
+            throw new Exception(error);
+        }
+    }
+
+    public void transcode(String inputFileLocation,
+                            String videoEncoder,
+                            Integer videoBitRate,
+                            Integer frameRate,
+                            String audioEncoder,
+                            Integer audioBitRate ,
+                            Integer audioSamplingFrequency,
+                            String  outputFileLocation
+    )  throws  Exception {
+
+        String cmd = "/usr/local/bin/ffmpeg -y -i " +
+                inputFileLocation +
+                " -vcodec " +
+                videoEncoder +
+                " -b:v " +
+                videoBitRate +
+                " -r " +
+                frameRate +
+                " -acodec " +
+                audioEncoder +
+                " -b:a " +
+                audioBitRate +
+                " -ar " +
+                audioSamplingFrequency +
+                " " +
+                outputFileLocation;
+
+        ProcessBuilder builder = new ProcessBuilder();
+        builder.command("sh", "-c", cmd);
+
+        Process process = builder.start();
+        String output  = loadStream(process.getInputStream());
         String error  = loadStream(process.getErrorStream());
 
         int rc = process.waitFor();

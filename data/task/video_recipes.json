@@ -1,6 +1,5 @@
-
-  {
-  "name": "video_recipe",
+{
+  "name": "video_recipes",
   "retryCount": 3,
   "timeoutSeconds": 3600,
   "pollTimeoutSeconds": 3600,
@@ -20,4 +19,4 @@
   "rateLimitFrequencyInSeconds": 60,
   "rateLimitPerFrequency": 50,
   "ownerEmail": "devrel@orkes.io"
-  }
+}
