@@ -1,0 +1,58 @@
+{
+  "name": "video_recipes",
+  "description": "Video Recipes Workflow",
+  "version": 1,
+  "tasks": [
+    {
+      "name": "video_recipes_prefork",
+      "taskReferenceName": "video_recipes_prefork_ref",
+      "inputParameters": {
+        "fileLocations" : "${workflow.input.fileLocations}",
+        "recipeInfos": "${workflow.input.recipeInfos}"
+      },
+      "type": "SIMPLE"
+    },
+    {
+      "name": "video_recipes_fork",
+      "taskReferenceName": "video_recipes_fork_ref",
+      "inputParameters": {
+        "dynamicTasks": "${video_recipes_prefork_ref.output.dynamicTasks}",
+        "dynamicTasksInput": "${video_recipes_prefork_ref.output.dynamicTasksInput}"
+      },
+      "type": "FORK_JOIN_DYNAMIC",
+      "decisionCases": {},
+      "dynamicForkTasksParam": "dynamicTasks",
+      "dynamicForkTasksInputParamName": "dynamicTasksInput"
+    },
+    {
+      "name": "video_recipes_join",
+      "taskReferenceName": "video_recipes_join_ref",
+      "inputParameters": {},
+      "type": "JOIN",
+      "decisionCases": {},
+      "defaultCase": [],
+      "forkTasks": [],
+      "startDelay": 0,
+      "joinOn": [],
+      "optional": false,
+      "defaultExclusiveJoinTask": [],
+      "asyncComplete": false,
+      "loopOver": []
+    }
+  ],
+  "inputParameters": [
+    "fileLocations",
+    "recipeInfos"
+  ],
+  "outputParameters": {
+    "fileLocations": "${video_recipes_join_ref.output}"
+  },
+  "schemaVersion": 2,
+  "restartable": true,
+  "workflowStatusListenerEnabled": true,
+  "ownerEmail": "devrel@orkes.io",
+  "timeoutPolicy": "ALERT_ONLY",
+  "timeoutSeconds": 0,
+  "variables": {},
+  "inputTemplate": {}
+}
