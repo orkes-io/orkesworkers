@@ -157,7 +157,7 @@ public class VideoRecipeWorker implements Worker {
                             String  outputFileLocation
     )  throws  Exception {
 
-        String cmd = "/usr/local/bin/ffmpeg -y -i " +
+        String cmd = "ffmpeg -y -i " +
                 inputFileLocation +
                 " -vcodec " +
                 videoEncoder +
