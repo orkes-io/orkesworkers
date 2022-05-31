@@ -8,6 +8,7 @@ import com.netflix.conductor.common.metadata.tasks.Task;
 import com.netflix.conductor.common.metadata.tasks.TaskResult;
 import io.orkes.samples.utils.S3Utils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.core.util.FileUtils;
 import org.im4java.core.ConvertCmd;
 import org.im4java.core.IMOperation;
 import org.springframework.stereotype.Component;
@@ -106,7 +107,12 @@ public class VideoRecipeWorker implements Worker {
 
             String s3BucketName = "image-processing-orkes";
 
+            log.info("Uploading file to s3: {}", outputFileName);
+            log.info("Uploading file size: {}", new File(outputFileName).length());
+
             String url = S3Utils.uploadToS3(outputFileName, Regions.US_EAST_1, s3BucketName);
+            log.info("Completed File upload: {}", url);
+
             result.setStatus(TaskResult.Status.COMPLETED);
             result.addOutputData("fileLocation", url);
             result.addOutputData("recipe", recipe);
@@ -115,11 +121,14 @@ public class VideoRecipeWorker implements Worker {
 
         } catch (Exception e) {
             e.printStackTrace();
+            log.error(e.getMessage());
             result.setStatus(TaskResult.Status.FAILED);
             final StringWriter sw = new StringWriter();
             final PrintWriter pw = new PrintWriter(sw, true);
             e.printStackTrace(pw);
-            result.log(sw.getBuffer().toString());
+            String message = sw.getBuffer().toString();
+            log.error(message);
+            result.log(message);
         }
         return result;
     }
