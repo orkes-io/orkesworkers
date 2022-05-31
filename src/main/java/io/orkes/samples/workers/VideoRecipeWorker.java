@@ -7,6 +7,7 @@ import com.netflix.conductor.client.worker.Worker;
 import com.netflix.conductor.common.metadata.tasks.Task;
 import com.netflix.conductor.common.metadata.tasks.TaskResult;
 import io.orkes.samples.utils.S3Utils;
+import lombok.extern.slf4j.Slf4j;
 import org.im4java.core.ConvertCmd;
 import org.im4java.core.IMOperation;
 import org.springframework.stereotype.Component;
@@ -49,6 +50,7 @@ enum VIDEO_RECIPE {
 }
 
 @Component
+@Slf4j
 public class VideoRecipeWorker implements Worker {
 
     @Override
@@ -73,6 +75,11 @@ public class VideoRecipeWorker implements Worker {
 
             String fileExtension = Files.getFileExtension(fileLocation);
             String outputFileName = "/tmp/" + UUID.randomUUID().toString() + "-" + recipe.name() + "."+fileExtension;
+
+            log.info("Retry count: {}", task.getRetryCount());
+            log.info("Recipe Name: {}", recipe.name());
+            log.info("Recipe Parameters: {}", recipeParameters);
+
 
 
             if(recipe == VIDEO_RECIPE.WATERMARK) {
@@ -138,11 +145,14 @@ public class VideoRecipeWorker implements Worker {
         ProcessBuilder builder = new ProcessBuilder();
         builder.command("sh", "-c", cmd);
 
+        log.info("ffmpeg cmd: {}", cmd);
+
         Process process = builder.start();
         String error  = loadStream(process.getErrorStream());
 
         int rc = process.waitFor();
         if(rc != 0) {
+            log.error("error message: {}", error);
             throw new Exception(error);
         }
     }
@@ -177,12 +187,15 @@ public class VideoRecipeWorker implements Worker {
         ProcessBuilder builder = new ProcessBuilder();
         builder.command("sh", "-c", cmd);
 
+        log.info("ffmpeg cmd: {}", cmd);
+
         Process process = builder.start();
         String output  = loadStream(process.getInputStream());
         String error  = loadStream(process.getErrorStream());
 
         int rc = process.waitFor();
         if(rc != 0) {
+            log.error("error message: {}", error);
             throw new Exception(error);
         }
     }
