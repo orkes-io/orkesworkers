@@ -194,12 +194,12 @@ public class VideoRecipeWorker implements Worker {
 
         String cmd = "ffmpeg -y -i " +
                 inputFileLocation +
-                (videoEncoder != null ? " -vcodec " + videoEncoder : null ) +
-                (videoBitRate != null ? " -b:v  " + videoBitRate : null ) +
-                (frameRate != null ? " -r  " + frameRate : null ) +
-                (audioEncoder != null ? " -acodec  " + audioEncoder : null ) +
-                (audioEncoder != null ? " -b:a  " + audioEncoder : null ) +
-                (audioEncoder != null ? " -ar  " + audioEncoder : null ) +
+                (videoEncoder != null ? " -vcodec " + videoEncoder : "" ) +
+                (videoBitRate != null ? " -b:v  " + videoBitRate : "" ) +
+                (frameRate != null ? " -r  " + frameRate : "" ) +
+                (audioEncoder != null ? " -acodec  " + audioEncoder : "" ) +
+                (audioEncoder != null ? " -b:a  " + audioEncoder : "" ) +
+                (audioEncoder != null ? " -ar  " + audioEncoder : "" ) +
                 " " +
                 outputFileLocation;
 
