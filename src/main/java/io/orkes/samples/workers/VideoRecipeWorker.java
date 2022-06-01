@@ -198,8 +198,8 @@ public class VideoRecipeWorker implements Worker {
                 (videoBitRate != null ? " -b:v  " + videoBitRate : "" ) +
                 (frameRate != null ? " -r  " + frameRate : "" ) +
                 (audioEncoder != null ? " -acodec  " + audioEncoder : "" ) +
-                (audioEncoder != null ? " -b:a  " + audioEncoder : "" ) +
-                (audioEncoder != null ? " -ar  " + audioEncoder : "" ) +
+                (audioBitRate != null ? " -b:a  " + audioBitRate : "" ) +
+                (audioSamplingFrequency != null ? " -ar  " + audioSamplingFrequency : "" ) +
                 " " +
                 outputFileLocation;
 
