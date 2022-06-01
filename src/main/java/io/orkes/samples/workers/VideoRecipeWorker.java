@@ -19,8 +19,8 @@ import java.util.*;
 
 
 enum VIDEO_RECIPE {
-    THUMBNAIL_GENERATE("thumbnail_generate"),
-    SCENE_DETECT("scene_detect"),
+//    THUMBNAIL_GENERATE("thumbnail_generate"),
+//    SCENE_DETECT("scene_detect"),
     WATERMARK("watermark"),
     TRANSCODE("transcode"),
     ;
@@ -88,12 +88,12 @@ public class VideoRecipeWorker implements Worker {
 //                String gravity = ((String) recipeParameters.get("gravity"));
                 watermark(fileLocation, watermarkFileLocation, outputFileName);
             } else if(recipe == VIDEO_RECIPE.TRANSCODE) {
-                String videoEncoder = ((String) recipeParameters.get("videoEncoder"));
-                Integer videoBitRate = Doubles.tryParse(recipeParameters.get("videoBitRate").toString()).intValue();
-                Integer frameRate = Doubles.tryParse(recipeParameters.get("frameRate").toString()).intValue();
-                String audioEncoder = ((String) recipeParameters.get("audioEncoder"));
-                Integer audioBitRate = Doubles.tryParse(recipeParameters.get("audioBitRate").toString()).intValue();
-                Integer audioSamplingFrequency = Doubles.tryParse(recipeParameters.get("audioSamplingFrequency").toString()).intValue();
+                String videoEncoder = tryParseString(recipeParameters, "videoEncoder");
+                Integer videoBitRate = tryParseInteger(recipeParameters,"videoBitRate");
+                Integer frameRate = tryParseInteger(recipeParameters,"frameRate");
+                String audioEncoder = tryParseString(recipeParameters, "audioEncoder");
+                Integer audioBitRate = tryParseInteger(recipeParameters,"audioBitRate");
+                Integer audioSamplingFrequency = tryParseInteger(recipeParameters,"audioSamplingFrequency");
 
                 transcode(fileLocation,
                         videoEncoder,
@@ -131,6 +131,22 @@ public class VideoRecipeWorker implements Worker {
             result.log(message);
         }
         return result;
+    }
+
+    private String tryParseString(Map<String, Object> recipeParameters, String key) {
+        String value = null;
+        if(recipeParameters.containsKey(key)) {
+            value = ((String) recipeParameters.get(key));
+        }
+        return value;
+    }
+
+    private Integer tryParseInteger(Map<String, Object> recipeParameters, String key) {
+        Integer value = null;
+        if(recipeParameters.containsKey(key)) {
+            value = Doubles.tryParse(recipeParameters.get(key).toString()).intValue();
+        }
+        return value;
     }
 
     private VIDEO_RECIPE validateRecipeNames(String recipeName) throws Exception {
@@ -178,18 +194,12 @@ public class VideoRecipeWorker implements Worker {
 
         String cmd = "ffmpeg -y -i " +
                 inputFileLocation +
-                " -vcodec " +
-                videoEncoder +
-                " -b:v " +
-                videoBitRate +
-                " -r " +
-                frameRate +
-                " -acodec " +
-                audioEncoder +
-                " -b:a " +
-                audioBitRate +
-                " -ar " +
-                audioSamplingFrequency +
+                (videoEncoder != null ? " -vcodec " + videoEncoder : null ) +
+                (videoBitRate != null ? " -b:v  " + videoBitRate : null ) +
+                (frameRate != null ? " -r  " + frameRate : null ) +
+                (audioEncoder != null ? " -acodec  " + audioEncoder : null ) +
+                (audioEncoder != null ? " -b:a  " + audioEncoder : null ) +
+                (audioEncoder != null ? " -ar  " + audioEncoder : null ) +
                 " " +
                 outputFileLocation;
 
