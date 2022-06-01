@@ -71,10 +71,10 @@ public class VideoRecipeWorker implements Worker {
         try {
             String fileLocation = (String) task.getInputData().get("fileLocation");
             String recipeName = ((String) task.getInputData().get("recipe")).toLowerCase();
-            String outputFileFormat = tryParseString(task.getInputData(), ("outputFileFormat"));
 
             VIDEO_RECIPE recipe = validateRecipeNames(recipeName);
             Map<String, Object> recipeParameters = (Map<String, Object>) task.getInputData().get("recipeParameters");
+            String outputFileFormat = tryParseString(recipeParameters, "outputFileFormat");
 
             log.info("Output File Format: {}", outputFileFormat);
             String fileExtension = !Strings.isNullOrEmpty(outputFileFormat) ? outputFileFormat : Files.getFileExtension(fileLocation);
