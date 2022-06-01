@@ -70,11 +70,12 @@ public class VideoRecipeWorker implements Worker {
         try {
             String fileLocation = (String) task.getInputData().get("fileLocation");
             String recipeName = ((String) task.getInputData().get("recipe")).toLowerCase();
+            String outputFileFormat = tryParseString(task.getInputData(), ("outputFileFormat"));
 
             VIDEO_RECIPE recipe = validateRecipeNames(recipeName);
             Map<String, Object> recipeParameters = (Map<String, Object>) task.getInputData().get("recipeParameters");
 
-            String fileExtension = Files.getFileExtension(fileLocation);
+            String fileExtension = (outputFileFormat != null) ? outputFileFormat : Files.getFileExtension(fileLocation);
             String outputFileName = "/tmp/" + UUID.randomUUID().toString() + "-" + recipe.name() + "."+fileExtension;
 
             log.info("Retry count: {}", task.getRetryCount());
@@ -133,18 +134,18 @@ public class VideoRecipeWorker implements Worker {
         return result;
     }
 
-    private String tryParseString(Map<String, Object> recipeParameters, String key) {
+    private String tryParseString(Map<String, Object> obj, String key) {
         String value = null;
-        if(recipeParameters.containsKey(key)) {
-            value = ((String) recipeParameters.get(key));
+        if(obj.containsKey(key)) {
+            value = ((String) obj.get(key));
         }
         return value;
     }
 
-    private Integer tryParseInteger(Map<String, Object> recipeParameters, String key) {
+    private Integer tryParseInteger(Map<String, Object> obj, String key) {
         Integer value = null;
-        if(recipeParameters.containsKey(key)) {
-            value = Doubles.tryParse(recipeParameters.get(key).toString()).intValue();
+        if(obj.containsKey(key)) {
+            value = Doubles.tryParse(obj.get(key).toString()).intValue();
         }
         return value;
     }
