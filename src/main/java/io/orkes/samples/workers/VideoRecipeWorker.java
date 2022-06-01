@@ -1,6 +1,7 @@
 package io.orkes.samples.workers;
 
 import com.amazonaws.regions.Regions;
+import com.google.common.base.Strings;
 import com.google.common.io.Files;
 import com.google.common.primitives.Doubles;
 import com.netflix.conductor.client.worker.Worker;
@@ -75,7 +76,7 @@ public class VideoRecipeWorker implements Worker {
             VIDEO_RECIPE recipe = validateRecipeNames(recipeName);
             Map<String, Object> recipeParameters = (Map<String, Object>) task.getInputData().get("recipeParameters");
 
-            String fileExtension = (outputFileFormat != null) ? outputFileFormat : Files.getFileExtension(fileLocation);
+            String fileExtension = !Strings.isNullOrEmpty(outputFileFormat) ? outputFileFormat : Files.getFileExtension(fileLocation);
             String outputFileName = "/tmp/" + UUID.randomUUID().toString() + "-" + recipe.name() + "."+fileExtension;
 
             log.info("Retry count: {}", task.getRetryCount());
