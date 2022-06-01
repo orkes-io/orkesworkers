@@ -76,6 +76,7 @@ public class VideoRecipeWorker implements Worker {
             VIDEO_RECIPE recipe = validateRecipeNames(recipeName);
             Map<String, Object> recipeParameters = (Map<String, Object>) task.getInputData().get("recipeParameters");
 
+            log.info("Output File Format: {}", outputFileFormat);
             String fileExtension = !Strings.isNullOrEmpty(outputFileFormat) ? outputFileFormat : Files.getFileExtension(fileLocation);
             String outputFileName = "/tmp/" + UUID.randomUUID().toString() + "-" + recipe.name() + "."+fileExtension;
 
