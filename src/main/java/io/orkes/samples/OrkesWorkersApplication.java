@@ -74,6 +74,7 @@ public class OrkesWorkersApplication {
         TaskRunnerConfigurer runnerConfigurer = new TaskRunnerConfigurer
                 .Builder(taskClient, workersList)
                 .withThreadCount(Math.max(1, workersList.size()))
+                .withTaskToDomain(Map.of("task_example", "domain_example"))
                 .build();
         runnerConfigurer.init();
         return runnerConfigurer;
