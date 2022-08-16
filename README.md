@@ -10,6 +10,6 @@ The [Running your first worker](https://orkes.io/content/docs/getting-started/ru
 ### Run locally
 Once you have set up [Conductor locally](https://orkes.io/content/docs/getting-started/install/running-locally), there are several image processing workflows you can run.
 
-1. First image processing workflow. The [tutorial](https://orkes.io/content/blog/image-processing-workflow-with-conductor) will walk you through setting up dastks and a workflow.  Once it is up and running, you can send an image and dimensions - and receive a link to the modified image on S3.
+1. First image processing workflow. The [tutorial](https://orkes.io/content/blog/image-processing-workflow-with-conductor) will walk you through setting up tasks and a workflow.  Once it is up and running, you can send an image and dimensions - and receive a link to the modified image on S3.
 2. Image processing with FORKs.  Using a [Conductor Fork](https://orkes.io/content/blog/image-processing-multiple-images-forks) allows us to run  processes in parallel - in this case creating a jpg and webp image.
 3. Image processing with FORKs and Sub_workflows.  This example substitues the 2 tasks for the JPEG creation in example 2 with a subworkflow.
