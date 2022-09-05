@@ -1,0 +1,27 @@
+{
+  "createTime": 1662365503245,
+  "updateTime": 1662417794887,
+  "createdBy": "",
+  "updatedBy": "",
+  "name": "generate_thumbnails",
+  "description": "Generate Thumbnails from a video",
+  "retryCount": 3,
+  "timeoutSeconds": 3600,
+  "inputKeys": [
+    "fileLocation",
+    "outputFileFormat"
+  ],
+  "outputKeys": [
+    "thumbnailsInfo"
+  ],
+  "timeoutPolicy": "TIME_OUT_WF",
+  "retryLogic": "FIXED",
+  "retryDelaySeconds": 60,
+  "responseTimeoutSeconds": 600,
+  "inputTemplate": {},
+  "rateLimitPerFrequency": 0,
+  "rateLimitFrequencyInSeconds": 1,
+  "ownerEmail": "jeu@orkes.io",
+  "pollTimeoutSeconds": 3600,
+  "backoffScaleFactor": 1
+}

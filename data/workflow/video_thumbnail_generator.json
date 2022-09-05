@@ -1,0 +1,41 @@
+{
+  "updateTime": 1662417938904,
+  "name": "video_thumbnail_generator",
+  "description": "Edit or extend this sample workflow. Set the workflow name to get started",
+  "version": 1,
+  "tasks": [
+    {
+      "name": "generate_thumbnails",
+      "taskReferenceName": "generate_thumbnails_ref",
+      "inputParameters": {
+        "outputFileFormat": "${workflow.input.outputFileFormat}",
+        "fileLocation": "${workflow.input.fileLocation}"
+      },
+      "type": "SIMPLE",
+      "decisionCases": {},
+      "defaultCase": [],
+      "forkTasks": [],
+      "startDelay": 0,
+      "joinOn": [],
+      "optional": false,
+      "defaultExclusiveJoinTask": [],
+      "asyncComplete": false,
+      "loopOver": []
+    }
+  ],
+  "inputParameters": [
+    "fileLocation",
+    "outputFileFormat"
+  ],
+  "outputParameters": {
+    "thumbnailsInfo": "${generate_thumbnails_ref.output.thumbnailsInfo}"
+  },
+  "schemaVersion": 2,
+  "restartable": true,
+  "workflowStatusListenerEnabled": false,
+  "ownerEmail": "jeu@orkes.io",
+  "timeoutPolicy": "ALERT_ONLY",
+  "timeoutSeconds": 0,
+  "variables": {},
+  "inputTemplate": {}
+}
