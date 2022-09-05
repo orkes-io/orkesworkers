@@ -81,7 +81,7 @@ public class GenerateThumbnailsWorker implements Worker {
         String timeTxtFile = "/tmp/"+ UUID.randomUUID().toString() + "-time.txt";
         log.info("timeTxtFile: {}", timeTxtFile);
 
-        String cmd = "/usr/local/bin/ffmpeg -i " +
+        String cmd = "ffmpeg -i " +
                 inputFileLocation +
                 " -vf " +
                 " \"select='gt(scene\\,0.5)',metadata=print:file="+timeTxtFile+"\" " +
