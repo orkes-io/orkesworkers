@@ -1,10 +1,11 @@
 package io.orkes.samples;
 
-import com.netflix.conductor.client.automator.TaskRunnerConfigurer;
-import com.netflix.conductor.client.http.TaskClient;
 import com.netflix.conductor.client.worker.Worker;
-import io.orkes.conductor.client.http.OrkesClient;
-import io.orkes.conductor.client.http.OrkesTaskClient;
+import io.orkes.conductor.client.ApiClient;
+import io.orkes.conductor.client.OrkesClients;
+import io.orkes.conductor.client.TaskClient;
+import io.orkes.conductor.client.WorkflowClient;
+import io.orkes.conductor.client.automator.TaskRunnerConfigurer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.SpringApplication;
@@ -33,39 +34,46 @@ public class OrkesWorkersApplication {
     }
 
     public static void main(String[] args) throws IOException {
-        log.info("Loading Orkes Demo workers application...");
+        log.info("Loading Orkes Academy application...");
         loadExternalConfig();
         SpringApplication.run(OrkesWorkersApplication.class, args);
     }
 
     @Bean
-    public TaskClient taskClient() {
+    public OrkesClients orkesClients() {
         String rootUri = env.getProperty(CONDUCTOR_SERVER_URL);
-        log.info("Conductor Server URL: {}", rootUri);
-
-        OrkesTaskClient taskClient = new OrkesTaskClient();
-        taskClient.setRootURI(rootUri);
-        setCredentialsIfPresent(taskClient);
-
-        return taskClient;
-    }
-
-    private void setCredentialsIfPresent(OrkesClient client) {
-        String keyId = env.getProperty(CONDUCTOR_CLIENT_KEY_ID);
+        String key = env.getProperty(CONDUCTOR_CLIENT_KEY_ID);
         String secret = env.getProperty(CONDUCTOR_CLIENT_SECRET);
 
-        log.info("Conductor Key: {}", keyId);
-
-        if ("_CHANGE_ME_".equals(keyId) || "_CHANGE_ME_".equals(secret)) {
+        if ("_CHANGE_ME_".equals(key) || "_CHANGE_ME_".equals(secret)) {
             log.error("Please provide an application key id and secret");
             throw new RuntimeException("No Application Key");
         }
-        if (!StringUtils.isBlank(keyId) && !StringUtils.isBlank(secret)) {
-            log.info("setCredentialsIfPresent: Using authentication with access key '{}'", keyId);
-            client.withCredentials(keyId, secret);
+
+        ApiClient apiClient = null;
+
+        log.info("Conductor Server URL: {}", rootUri);
+        if(StringUtils.isNotBlank(key) && StringUtils.isNotBlank(secret)) {
+            log.info("Using Key and Secret to connect to the server");
+            apiClient = new ApiClient(rootUri, key, secret);
         } else {
             log.info("setCredentialsIfPresent: Proceeding without client authentication");
+            apiClient = new ApiClient(rootUri);
         }
+        OrkesClients orkesClients = new OrkesClients(apiClient);
+        return orkesClients;
+    }
+
+    @Bean
+    public TaskClient taskClient(OrkesClients orkesClients) {
+        TaskClient taskClient = orkesClients.getTaskClient();
+        return taskClient;
+    }
+
+    @Bean
+    public WorkflowClient workflowClient(OrkesClients orkesClients) {
+        WorkflowClient workflowClient = orkesClients.getWorkflowClient();
+        return workflowClient;
     }
 
     @Bean
@@ -80,7 +88,7 @@ public class OrkesWorkersApplication {
     }
 
     /**
-     * Reads properties from the location specified in <code>ORKES_WORKERS_CONFIG_FILE</code>
+     * Reads properties from the location specified in <code>ORKES_ACADEMY_CONFIG_FILE</code>
      * and sets them as system properties so they override the default properties.
      * <p>
      * Spring Boot property hierarchy is documented here,
@@ -89,7 +97,7 @@ public class OrkesWorkersApplication {
      * @throws IOException if file can't be read.
      */
     private static void loadExternalConfig() throws IOException {
-        String configFile = System.getProperty("ORKES_WORKERS_CONFIG_FILE");
+        String configFile = System.getProperty("ORKES_ACADEMY_CONFIG_FILE");
         if (!ObjectUtils.isEmpty(configFile)) {
             FileSystemResource resource = new FileSystemResource(configFile);
             if (resource.exists()) {

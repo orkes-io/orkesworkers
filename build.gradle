@@ -7,7 +7,7 @@ plugins {
 ext {
     appVersion = '1.0-SNAPSHOT'
     versions = [
-            orkesClient: '0.2.0',
+            orkesClient: '1.0.2',
             guava      : '31.0.1-jre',
             im4java    : '1.4.0',
             log4j      : '2.17.1!!',
@@ -39,6 +39,8 @@ dependencies {
     implementation "org.apache.logging.log4j:log4j-web:${versions.log4j}"
 
     implementation "io.orkes.conductor:orkes-conductor-client:${versions.orkesClient}"
+    implementation 'com.netflix.conductor:conductor-common:3.8.1'
+    implementation 'com.netflix.conductor:conductor-client:3.8.1'
 
     implementation "org.im4java:im4java:${versions.im4java}"
     implementation "com.google.guava:guava:${versions.guava}"

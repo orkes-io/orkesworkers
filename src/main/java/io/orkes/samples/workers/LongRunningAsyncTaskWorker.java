@@ -1,7 +1,7 @@
 package io.orkes.samples.workers;
 
 import com.google.common.util.concurrent.Uninterruptibles;
-import com.netflix.conductor.client.http.TaskClient;
+import io.orkes.conductor.client.TaskClient;
 import com.netflix.conductor.client.worker.Worker;
 import com.netflix.conductor.common.metadata.tasks.Task;
 import com.netflix.conductor.common.metadata.tasks.TaskResult;

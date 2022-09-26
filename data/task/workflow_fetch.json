@@ -1,0 +1,23 @@
+{
+  "name": "workflow_fetch",
+  "retryCount": 3,
+  "timeoutSeconds": 3600,
+  "pollTimeoutSeconds": 3600,
+  "inputKeys": [
+    "correlationId",
+    "name",
+    "includeClosed",
+    "includeTasks"
+  ],
+  "outputKeys": [
+    "fileLocation"
+  ],
+  "timeoutPolicy": "TIME_OUT_WF",
+  "retryLogic": "FIXED",
+  "retryDelaySeconds": 600,
+  "responseTimeoutSeconds": 3600,
+  "concurrentExecLimit": 100,
+  "rateLimitFrequencyInSeconds": 60,
+  "rateLimitPerFrequency": 50,
+  "ownerEmail": "devrel@orkes.io"
+}
