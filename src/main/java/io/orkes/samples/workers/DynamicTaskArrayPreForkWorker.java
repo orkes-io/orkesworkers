@@ -47,7 +47,7 @@ public class DynamicTaskArrayPreForkWorker implements Worker {
                 taskName = (String) (task.getInputData().get("taskName"));
             }
 
-            String taskType = ((String) task.getInputData().get("taskType")).toLowerCase();
+            String taskType = ((String) task.getInputData().get("taskType")).toUpperCase();
             TaskType type = validateTaskTypes(taskType);
 
 
