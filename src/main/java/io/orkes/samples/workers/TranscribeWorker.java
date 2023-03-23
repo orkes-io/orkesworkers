@@ -21,10 +21,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Strings;
 import com.google.common.io.Files;
 
-import java.io.File;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -89,15 +86,24 @@ public class TranscribeWorker implements Worker {
                     // this needs to be handled and put into a error message
                     // Is there a better way of handling this
 
-                    String getNameWithoutExtension = Files.getNameWithoutExtension(fileLocation);
-                    String tmpOutputFileName = "/tmp/" + UUID.randomUUID().toString() + "-" + getNameWithoutExtension + "."+ responseFormat;
+                    String nameWithoutExtension = Files.getNameWithoutExtension(fileLocation);
+                    String tmpOutputFileName = "/tmp/" + UUID.randomUUID().toString() + "-" + nameWithoutExtension + "."+ responseFormat;
                     Path path = Paths.get(tmpOutputFileName);
 
                     byte[] strToBytes = content.getBytes();
                     java.nio.file.Files.write(path, strToBytes);
+
+                    String outputFileNameWithSubtitles = nameWithoutExtension+".m4v";
+                    String outputFileWithSubtitles = "/tmp/" + UUID.randomUUID().toString() + "-" + outputFileNameWithSubtitles;
+
+                    addSubtitleToFile(tmpInputFileName, tmpOutputFileName, "eng", outputFileWithSubtitles);
+
                     String s3BucketName = "image-processing-orkes";
-                    String url = S3Utils.uploadToS3(tmpOutputFileName, Regions.US_EAST_1, s3BucketName);
-                    result.addOutputData("subtitleFileUrl", url);
+                    String subtitleFileUrl = S3Utils.uploadToS3(tmpOutputFileName, Regions.US_EAST_1, s3BucketName);
+                    String videoFileWithSubtitlesUrl = S3Utils.uploadToS3(outputFileWithSubtitles, Regions.US_EAST_1, s3BucketName);
+
+                    result.addOutputData("subtitleFileUrl", subtitleFileUrl);
+                    result.addOutputData("videoFileWithSubtitlesUrl", videoFileWithSubtitlesUrl);
                     result.addOutputData("index", index);
                     result.addOutputData("fileLocation", fileLocation);
 
@@ -118,6 +124,45 @@ public class TranscribeWorker implements Worker {
             result.log(message);
         }
         return result;
+    }
+
+
+    public void addSubtitleToFile(String inputFileLocation, String subtitleLocation, String language,  String outputFile )  throws  Exception {
+
+        //        ffmpeg -i ./$f -i $f.srt -c copy -c:s mov_text -metadata:s:s:0 language=eng $f.m4v
+        String cmd = "ffmpeg -i " +
+                inputFileLocation +
+                " -i " +
+                subtitleLocation +
+                " -c copy -c:s mov_text -metadata:s:s:0 language " +
+                language +
+                " " +
+                outputFile
+        ;
+
+        ProcessBuilder builder = new ProcessBuilder();
+        builder.command("sh", "-c", cmd);
+
+        log.info("ffmpeg cmd: {}", cmd);
+
+        Process process = builder.start();
+        String error  = loadStream(process.getErrorStream());
+
+        int rc = process.waitFor();
+        if(rc != 0) {
+            log.error("error message: {}", error);
+            throw new Exception(error);
+        }
+    }
+
+    private static String loadStream(InputStream s) throws Exception
+    {
+        BufferedReader br = new BufferedReader(new InputStreamReader(s));
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while((line=br.readLine()) != null)
+            sb.append(line).append("\n");
+        return sb.toString();
     }
 
 }
