@@ -1,6 +1,7 @@
 package io.orkes.samples.workers;
 
 import com.amazonaws.regions.Regions;
+import com.google.common.primitives.Doubles;
 import com.netflix.conductor.client.worker.Worker;
 import com.netflix.conductor.common.metadata.tasks.Task;
 import com.netflix.conductor.common.metadata.tasks.TaskResult;
@@ -47,8 +48,9 @@ public class TranscribeWorker implements Worker {
         try {
 
             String fileLocation = (String) task.getInputData().get("fileLocation");
-            String outputFileName = (String) task.getInputData().get("outputFileName");
             String openApiKey = (String) task.getInputData().get("open_api_key");
+            Integer index = Doubles.tryParse(task.getInputData().get("index").toString()).intValue();
+
 
             HttpPost post = new HttpPost("https://api.openai.com/v1/audio/transcriptions");
             post.addHeader("Authorization", "Bearer " + openApiKey);
@@ -62,9 +64,9 @@ public class TranscribeWorker implements Worker {
             final MultipartEntityBuilder builder = MultipartEntityBuilder.create();
 
             FileBody data = new FileBody(file);
-
+            String responseFormat = "srt";
             builder.addPart("model", new StringBody("whisper-1", ContentType.DEFAULT_TEXT));
-            builder.addPart("response_format", new StringBody("srt", ContentType.DEFAULT_TEXT));
+            builder.addPart("response_format", new StringBody(responseFormat, ContentType.DEFAULT_TEXT));
             builder.addPart("file", data);
 
             final HttpEntity entity = builder.build();
@@ -87,7 +89,8 @@ public class TranscribeWorker implements Worker {
                     // this needs to be handled and put into a error message
                     // Is there a better way of handling this
 
-                    String tmpOutputFileName = "/tmp/" + UUID.randomUUID().toString() + "-" + outputFileName;
+                    String getNameWithoutExtension = Files.getNameWithoutExtension(fileLocation);
+                    String tmpOutputFileName = "/tmp/" + UUID.randomUUID().toString() + "-" + getNameWithoutExtension + "."+ responseFormat;
                     Path path = Paths.get(tmpOutputFileName);
 
                     byte[] strToBytes = content.getBytes();
@@ -95,6 +98,7 @@ public class TranscribeWorker implements Worker {
                     String s3BucketName = "image-processing-orkes";
                     String url = S3Utils.uploadToS3(tmpOutputFileName, Regions.US_EAST_1, s3BucketName);
                     result.addOutputData("subtitleFileUrl", url);
+                    result.addOutputData("index", index);
                     result.addOutputData("fileLocation", fileLocation);
 
                 }
