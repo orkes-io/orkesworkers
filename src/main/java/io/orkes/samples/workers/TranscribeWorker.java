@@ -45,11 +45,12 @@ public class TranscribeWorker implements Worker {
         TaskResult result = new TaskResult(task);
         String fileLocation = (String) task.getInputData().get("fileLocation");
         String outputFileName = (String) task.getInputData().get("outputFileName");
+        String openApiKey = (String) task.getInputData().get("open_api_key");
 
         try {
 
             HttpPost post = new HttpPost("https://api.openai.com/v1/audio/transcriptions");
-            post.addHeader("Authorization", "Bearer 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");
+            post.addHeader("Authorization", "Bearer " + openApiKey);
 
             InputStream in = new URL(fileLocation).openStream();
             String fileExtension = Files.getFileExtension(fileLocation);
