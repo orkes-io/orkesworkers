@@ -43,11 +43,12 @@ public class TranscribeWorker implements Worker {
     @Override
     public TaskResult execute(Task task) {
         TaskResult result = new TaskResult(task);
-        String fileLocation = (String) task.getInputData().get("fileLocation");
-        String outputFileName = (String) task.getInputData().get("outputFileName");
-        String openApiKey = (String) task.getInputData().get("open_api_key");
 
         try {
+
+            String fileLocation = (String) task.getInputData().get("fileLocation");
+            String outputFileName = (String) task.getInputData().get("outputFileName");
+            String openApiKey = (String) task.getInputData().get("open_api_key");
 
             HttpPost post = new HttpPost("https://api.openai.com/v1/audio/transcriptions");
             post.addHeader("Authorization", "Bearer " + openApiKey);
