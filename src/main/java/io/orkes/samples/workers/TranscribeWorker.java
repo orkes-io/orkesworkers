@@ -35,7 +35,7 @@ public class TranscribeWorker implements Worker {
 
     @Override
     public String getTaskDefName() {
-        return "transcribe";
+        return "transcribe_test";
     }
 
     @Override
@@ -134,7 +134,7 @@ public class TranscribeWorker implements Worker {
                 inputFileLocation +
                 " -i " +
                 subtitleLocation +
-                " -c copy -c:s mov_text -metadata:s:s:0 language " +
+                " -c copy -c:s mov_text -metadata:s:s:0 language=" +
                 language +
                 " " +
                 outputFile
