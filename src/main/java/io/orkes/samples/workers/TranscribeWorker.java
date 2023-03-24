@@ -35,7 +35,7 @@ public class TranscribeWorker implements Worker {
 
     @Override
     public String getTaskDefName() {
-        return "transcribe_test";
+        return "transcribe";
     }
 
     @Override

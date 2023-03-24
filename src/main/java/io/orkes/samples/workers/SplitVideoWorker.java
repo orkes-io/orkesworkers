@@ -29,7 +29,7 @@ public class SplitVideoWorker implements Worker {
 
     @Override
     public String getTaskDefName() {
-        return "split_video_test";
+        return "split_video";
     }
 
     @Override
