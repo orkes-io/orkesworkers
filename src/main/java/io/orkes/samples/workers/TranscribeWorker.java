@@ -47,6 +47,7 @@ public class TranscribeWorker implements Worker {
             String fileLocation = (String) task.getInputData().get("fileLocation");
             String openApiKey = (String) task.getInputData().get("open_api_key");
             Integer dataIndex = Doubles.tryParse(task.getInputData().get("dataIndex").toString()).intValue();
+            result.log("dataIndex: " + dataIndex);
 
 
             HttpPost post = new HttpPost("https://api.openai.com/v1/audio/transcriptions");
@@ -101,11 +102,14 @@ public class TranscribeWorker implements Worker {
                     String s3BucketName = "image-processing-orkes";
                     String subtitleFileUrl = S3Utils.uploadToS3(tmpOutputFileName, Regions.US_EAST_1, s3BucketName);
                     String videoFileWithSubtitlesUrl = S3Utils.uploadToS3(outputFileWithSubtitles, Regions.US_EAST_1, s3BucketName);
+                    result.log("file Uploaded: " + subtitleFileUrl);
+                    result.log("file Uploaded: " + videoFileWithSubtitlesUrl);
 
                     result.addOutputData("subtitleFileUrl", subtitleFileUrl);
                     result.addOutputData("videoFileWithSubtitlesUrl", videoFileWithSubtitlesUrl);
                     result.addOutputData("dataIndex", dataIndex);
                     result.addOutputData("fileLocation", fileLocation);
+                    result.log("dataIndex: " + dataIndex);
 
                 }
             }
