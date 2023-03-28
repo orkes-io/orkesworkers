@@ -1,33 +1,24 @@
 package io.orkes.samples.workers;
 
 import com.amazonaws.regions.Regions;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.io.Files;
-import com.google.common.primitives.Doubles;
 import com.netflix.conductor.client.worker.Worker;
 import com.netflix.conductor.common.metadata.tasks.Task;
 import com.netflix.conductor.common.metadata.tasks.TaskResult;
 import io.orkes.samples.utils.S3Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOCase;
-import org.apache.commons.io.filefilter.PrefixFileFilter;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 
 @Component
@@ -43,7 +34,6 @@ public class MergeVideoSubtitlesWorker implements Worker {
     public TaskResult execute(Task task) {
 
         TaskResult result = new TaskResult(task);
-        JSONParser parser = new JSONParser();
 
         try {
             List<Map<String, Object>> filesToMerge = (List<Map<String, Object>>) task.getInputData().get("files_to_merge");
