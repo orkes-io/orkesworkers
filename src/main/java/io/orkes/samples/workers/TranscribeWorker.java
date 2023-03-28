@@ -46,7 +46,7 @@ public class TranscribeWorker implements Worker {
 
             String fileLocation = (String) task.getInputData().get("fileLocation");
             String openApiKey = (String) task.getInputData().get("open_api_key");
-            Integer index = Doubles.tryParse(task.getInputData().get("index").toString()).intValue();
+            Integer dataIndex = Doubles.tryParse(task.getInputData().get("dataIndex").toString()).intValue();
 
 
             HttpPost post = new HttpPost("https://api.openai.com/v1/audio/transcriptions");
@@ -104,7 +104,7 @@ public class TranscribeWorker implements Worker {
 
                     result.addOutputData("subtitleFileUrl", subtitleFileUrl);
                     result.addOutputData("videoFileWithSubtitlesUrl", videoFileWithSubtitlesUrl);
-                    result.addOutputData("index", index);
+                    result.addOutputData("dataIndex", dataIndex);
                     result.addOutputData("fileLocation", fileLocation);
 
                 }
