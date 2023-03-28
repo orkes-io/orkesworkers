@@ -110,6 +110,7 @@ public class TranscribeWorker implements Worker {
                 }
             }
 
+
             result.setStatus(TaskResult.Status.COMPLETED);
 
         } catch (Exception e) {
