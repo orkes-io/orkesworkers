@@ -1,77 +1,113 @@
 package io.orkes.samples.workers;
 
 import com.amazonaws.regions.Regions;
-import com.google.common.base.Strings;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.io.Files;
 import com.google.common.primitives.Doubles;
 import com.netflix.conductor.client.worker.Worker;
 import com.netflix.conductor.common.metadata.tasks.Task;
 import com.netflix.conductor.common.metadata.tasks.TaskResult;
 import io.orkes.samples.utils.S3Utils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOCase;
+import org.apache.commons.io.filefilter.PrefixFileFilter;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.net.URL;
-import java.nio.file.Files;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import org.apache.commons.io.IOCase;
-import org.apache.commons.io.filefilter.PrefixFileFilter;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
+
 @Component
 @Slf4j
-public class SplitVideoWorker implements Worker {
+public class MergeVideoSubtitlesWorker implements Worker {
 
     @Override
     public String getTaskDefName() {
-        return "split_video";
+        return "merge_video_subtitles";
     }
 
     @Override
     public TaskResult execute(Task task) {
 
         TaskResult result = new TaskResult(task);
+        JSONParser parser = new JSONParser();
 
         try {
-            String fileLocation = (String) task.getInputData().get("fileLocation");
-            String outputFileNamePrefix = (String) task.getInputData().get("outputFileNamePrefix");
-            Integer durationInSeconds = Doubles.tryParse(task.getInputData().get("durationInSeconds").toString()).intValue();
+            List<Map<String, Object>> filesToMerge = (List<Map<String, Object>>) task.getInputData().get("files_to_merge");
+            String outputFileFormat = (String) task.getInputData().get("outputFileFormat");
 
-            Path tmpOutputdir = java.nio.file.Files.createTempDirectory(Paths.get("/tmp"), "split-video-");
-            Path tmpOutputdirPrefix = Paths.get(tmpOutputdir.toString(),outputFileNamePrefix);
+            String inputFilesListContent = "";
+            String subtitllesFileListContent = "";
 
-            InputStream in = new URL(fileLocation).openStream();
-            String fileExtension = com.google.common.io.Files.getFileExtension(fileLocation);
+            List<String> tmpFiles = Lists.newArrayList();
 
-            String tmpInputFileName = "/tmp/" + UUID.randomUUID().toString() + "."+fileExtension;
-            java.nio.file.Files.copy(in, Paths.get(tmpInputFileName), StandardCopyOption.REPLACE_EXISTING);
+            for (Map<String, Object> fileIno :
+                    filesToMerge) {
+                String videoFileUrl =  (String) fileIno.get("videoFileWithSubtitlesUrl");
+                String subtitleFileUrl = (String) fileIno.get("subtitleFileUrl");
 
-            splitVideo(tmpInputFileName, durationInSeconds, tmpOutputdirPrefix.toString(), fileExtension);
+                String videoFileName = Files.getFileExtension(videoFileUrl) + "." + Files.getNameWithoutExtension(videoFileUrl);
+                String subTitleFileName = Files.getFileExtension(subtitleFileUrl) + "." + Files.getNameWithoutExtension(subtitleFileUrl);
 
-            List<String> urls = uploadFiles(tmpOutputdir, outputFileNamePrefix);
+                InputStream videoFileNameStream = new URL(videoFileUrl).openStream();
+                String tmpVideoFileName = "/tmp/" + UUID.randomUUID().toString() + "-"+videoFileName;
+                java.nio.file.Files.copy(videoFileNameStream, Paths.get(tmpVideoFileName), StandardCopyOption.REPLACE_EXISTING);
+                tmpFiles.add(tmpVideoFileName);
+                inputFilesListContent = inputFilesListContent + "file " + tmpVideoFileName + System.lineSeparator();
 
-            Map<String, Object> splitFiles = Maps.newHashMap();
-            int i = 0;
-            for (String url:
-                 urls) {
-                splitFiles.put(i++ + "", url);
+                InputStream subtitleFileNameStream = new URL(subtitleFileUrl).openStream();
+                String subtitleFileName = "/tmp/" + UUID.randomUUID().toString() + "-"+subTitleFileName;
+                java.nio.file.Files.copy(subtitleFileNameStream, Paths.get(subtitleFileName), StandardCopyOption.REPLACE_EXISTING);
+                tmpFiles.add(subtitleFileName);
+                subtitllesFileListContent = subtitllesFileListContent + subtitleFileName + System.lineSeparator();
+
             }
 
-            try {
-                    Files.delete(Paths.get(tmpInputFileName));
-                    Files.delete(tmpOutputdir);
-            } catch (Exception e) {
+            String inputFilesListName = "/tmp/" + UUID.randomUUID().toString() + "-input.txt";
+            String subtitlesFileListName = "/tmp/" + UUID.randomUUID().toString() + "-subtitles.txt";
 
-            }
+            FileUtils.writeStringToFile(new File(inputFilesListName), inputFilesListContent, Charset.forName("UTF-8"));
+            FileUtils.writeStringToFile(new File(subtitlesFileListName), subtitllesFileListContent, Charset.forName("UTF-8"));
+            tmpFiles.add(inputFilesListName);
+            tmpFiles.add(subtitlesFileListName);
+
+            String outputFileName = "/tmp/" + UUID.randomUUID().toString() + "."+ outputFileFormat;
+
+            mergeVideos(inputFilesListName, subtitlesFileListName, outputFileName);
+
+            String s3BucketName = "image-processing-orkes";
+
+            log.info("Uploading file to s3: {}", outputFileName);
+            log.info("Uploading file size: {}", new File(outputFileName).length());
+
+            String url = S3Utils.uploadToS3(outputFileName, Regions.US_EAST_1, s3BucketName);
+            log.info("Completed File upload: {}", url);
+            tmpFiles.add(outputFileName);
 
             result.setStatus(TaskResult.Status.COMPLETED);
-            result.addOutputData("fileLocation", fileLocation);
-            result.addOutputData("splitFiles", splitFiles);
+            result.addOutputData("fileLocation", url);
+
+            for (String file :
+                    tmpFiles) {
+                try {
+                    java.nio.file.Files.deleteIfExists(Paths.get(file));
+                }catch (Exception e) {
+                    result.log(e.getMessage());
+                }
+            }
 
 
         } catch (Exception e) {
@@ -89,33 +125,16 @@ public class SplitVideoWorker implements Worker {
     }
 
 
-    private List<String> uploadFiles(Path path, String fileNamePrefix) {
-        List<File> files = Lists.newArrayList(path.toFile().listFiles((FileFilter) new PrefixFileFilter(fileNamePrefix, IOCase.SENSITIVE)));
-        String s3BucketName = "image-processing-orkes";
-        List<String> urls = Lists.newArrayList();
-        for (File file:
-                files.stream().sorted().collect(Collectors.toList())) {
 
-            log.info("Uploading file to s3: {}", file.getAbsoluteFile().toString());
-            log.info("Uploading file size: {}", file.length());
+    public void mergeVideos(String inputFilesListName, String subtitlesFileListName, String outputFileName )  throws  Exception {
 
-            String url = S3Utils.uploadToS3(file.getAbsolutePath(), Regions.US_EAST_1, s3BucketName);
-            log.info("Completed File upload: {}", url);
-            urls.add(url);
-        }
-        return urls;
-    }
-
-    public void splitVideo(String inputFileLocation, Integer durationInSeconds, String  outputFileNamePrefix, String outputFileExtension )  throws  Exception {
-
-        // ffmpeg -i netflix.mp4 -c copy -map 0 -segment_time 30 -f segment -reset_timestamps 1 output%03d.mp4
-        String cmd = "ffmpeg -i " +
-                        inputFileLocation +
-                        " -c copy -map 0 -segment_time " +
-                        durationInSeconds +
-                        " -f segment -reset_timestamps 1  " +
-                        outputFileNamePrefix +
-                        "%03d" + "." + outputFileExtension ;
+        // ffmpeg -f concat -safe 0 -i input.txt -f srt -i subtitles.txt -c copy -c:s mov_text output.m4v
+        String cmd = "ffmpeg -f concat -safe 0 -i " +
+                        inputFilesListName +
+                        " -f srt -i " +
+                        subtitlesFileListName +
+                        " -c copy -c:s mov_text   " +
+                        outputFileName  ;
                 ;
 
         ProcessBuilder builder = new ProcessBuilder();
