@@ -38,12 +38,22 @@ public class MergeVideoSubtitlesWorker implements Worker {
         try {
             List<Map<String, Object>> filesToMerge = (List<Map<String, Object>>) task.getInputData().get("files_to_merge");
             String outputFileFormat = (String) task.getInputData().get("outputFileFormat");
+            String fileLocation = (String) task.getInputData().get("fileLocation");
 
+            String outputSubtitleFileFormat = "srt";
             String inputFilesListContent = "";
             String subtitllesFileListContent = "";
 
             List<String> tmpFiles = Lists.newArrayList();
 
+            // Download original File that needs to be subtitled
+            String originalFileName = Files.getNameWithoutExtension(fileLocation) + "." + Files.getFileExtension(fileLocation);
+            InputStream originalFileNameStream = new URL(fileLocation).openStream();
+            String tmpOriginalFileName = "/tmp/" + UUID.randomUUID().toString() + "-"+originalFileName;
+            java.nio.file.Files.copy(originalFileNameStream, Paths.get(tmpOriginalFileName), StandardCopyOption.REPLACE_EXISTING);
+            tmpFiles.add(tmpOriginalFileName);
+
+            // Generate the metadata files for the split media file and split subtitles
             for (Map<String, Object> fileIno :
                     filesToMerge) {
                 String videoFileUrl =  (String) fileIno.get("videoFileWithSubtitlesUrl");
@@ -66,6 +76,7 @@ public class MergeVideoSubtitlesWorker implements Worker {
 
             }
 
+            // Save metadata to file
             String inputFilesListName = "/tmp/" + UUID.randomUUID().toString() + "-input.txt";
             String subtitlesFileListName = "/tmp/" + UUID.randomUUID().toString() + "-subtitles.txt";
 
@@ -74,21 +85,40 @@ public class MergeVideoSubtitlesWorker implements Worker {
             tmpFiles.add(inputFilesListName);
             tmpFiles.add(subtitlesFileListName);
 
-            String outputFileName = "/tmp/" + UUID.randomUUID().toString() + "."+ outputFileFormat;
+            String mergedFileName = "/tmp/" + UUID.randomUUID().toString() + "."+ outputFileFormat;
+            // Merge split videos and subitles into one file
+            mergeVideos(inputFilesListName, subtitlesFileListName, mergedFileName);
+            tmpFiles.add(mergedFileName);
 
-            mergeVideos(inputFilesListName, subtitlesFileListName, outputFileName);
+            // Extract the merged subtitle file out
+            String outputMergedSubtitleFile = "/tmp/" + UUID.randomUUID().toString() + "."+ outputSubtitleFileFormat;
+            extractMergedSub(mergedFileName, outputMergedSubtitleFile);
+            tmpFiles.add(outputMergedSubtitleFile);
+
+            // add the subtitle file to the original video
+            String outputFileName = "/tmp/" + UUID.randomUUID().toString() + "."+ outputFileFormat;
+            addMergedSubToVideo(tmpOriginalFileName, outputMergedSubtitleFile, outputFileName);
+            tmpFiles.add(outputFileName);
 
             String s3BucketName = "image-processing-orkes";
 
-            log.info("Uploading file to s3: {}", outputFileName);
-            log.info("Uploading file size: {}", new File(outputFileName).length());
+            log.info("Uploading media file to s3: {}", outputFileName);
+            log.info("Uploading media file size: {}", new File(outputFileName).length());
 
             String url = S3Utils.uploadToS3(outputFileName, Regions.US_EAST_1, s3BucketName);
-            log.info("Completed File upload: {}", url);
-            tmpFiles.add(outputFileName);
+            log.info("Completed media File upload: {}", url);
+
+            log.info("Uploading subtitle file to s3: {}", outputFileName);
+            log.info("Uploading subtitlefile size: {}", new File(outputFileName).length());
+
+            String subTitleUrl = S3Utils.uploadToS3(outputMergedSubtitleFile, Regions.US_EAST_1, s3BucketName);
+            log.info("Completed  subtitle File upload: {}", subTitleUrl);
+
 
             result.setStatus(TaskResult.Status.COMPLETED);
             result.addOutputData("fileLocation", url);
+            result.addOutputData("subTitleFileLocation", subTitleUrl);
+
 
             for (String file :
                     tmpFiles) {
@@ -114,18 +144,68 @@ public class MergeVideoSubtitlesWorker implements Worker {
         return result;
     }
 
+    public void addMergedSubToVideo(String originalFileName, String outputMergedSubtitleFile, String outputFileName )  throws  Exception {
+
+        // ffmpeg -i input.mp4 -i input.srt -map 0 -map 1 -c:v copy -c:a copy -c:s mov_text output.m4v
+        String cmd = "ffmpeg -i " +
+                originalFileName +
+                "  -i " +
+                outputMergedSubtitleFile +
+                "  -map 0 -map 1 -c:v copy -c:a copy -c:s mov_text   " +
+                outputFileName
+                ;
+
+        ProcessBuilder builder = new ProcessBuilder();
+        builder.command("sh", "-c", cmd);
+
+        log.info("ffmpeg cmd: {}", cmd);
+
+        Process process = builder.start();
+        String error  = loadStream(process.getErrorStream());
+
+        int rc = process.waitFor();
+        if(rc != 0) {
+            log.error("error message: {}", error);
+            throw new Exception(error);
+        }
+    }
+
+
+    public void extractMergedSub(String mergedFileName, String outputMergedSubtitleFile )  throws  Exception {
+
+        // ffmpeg -i output.m4v -map 0:s:0 output.srt
+        String cmd = "ffmpeg -i " +
+                mergedFileName +
+                "  -map 0:s:0  " +
+                outputMergedSubtitleFile
+                ;
+
+        ProcessBuilder builder = new ProcessBuilder();
+        builder.command("sh", "-c", cmd);
+
+        log.info("ffmpeg cmd: {}", cmd);
+
+        Process process = builder.start();
+        String error  = loadStream(process.getErrorStream());
+
+        int rc = process.waitFor();
+        if(rc != 0) {
+            log.error("error message: {}", error);
+            throw new Exception(error);
+        }
+    }
 
 
     public void mergeVideos(String inputFilesListName, String subtitlesFileListName, String outputFileName )  throws  Exception {
 
         // ffmpeg -f concat -safe 0 -i input.txt -f srt -i subtitles.txt -c copy -c:s mov_text output.m4v
         String cmd = "ffmpeg -f concat -safe 0 -i " +
-                        inputFilesListName +
-                        " -f srt -i " +
-                        subtitlesFileListName +
-                        " -c copy -c:s mov_text   " +
-                        outputFileName  ;
-                ;
+                inputFilesListName +
+                " -f srt -i " +
+                subtitlesFileListName +
+                " -c copy -c:s mov_text   " +
+                outputFileName  ;
+        ;
 
         ProcessBuilder builder = new ProcessBuilder();
         builder.command("sh", "-c", cmd);
