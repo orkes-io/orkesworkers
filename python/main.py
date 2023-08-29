@@ -5,7 +5,7 @@ import sys
 import logging
 import os
 from conductor.client.automator.task_handler import TaskHandler
-from workers.workers import python_helloworld
+from workers.workers import python_helloworld, python_ocr
 from typing import Dict
 from conductor.client.configuration.configuration import Configuration
 from conductor.client.configuration.settings.authentication_settings import AuthenticationSettings
@@ -30,6 +30,11 @@ def start_workers() -> TaskHandler:
             Worker(
                 task_definition_name='python_hello',
                 execute_function=python_helloworld,
+                poll_interval=1
+            ),
+            Worker(
+                task_definition_name='ocr_task',
+                execute_function=python_ocr,
                 poll_interval=1
             ),
         ],

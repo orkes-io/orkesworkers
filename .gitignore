@@ -38,3 +38,6 @@ bin/*
 # e.g. application-local-viren.yml or application-local-vasiliy.properties
 **/application-local-*.yml
 **/application-local-*.properties
+
+#Python
+__pycache__
