@@ -1,4 +1,4 @@
 conductor-python==v1.0.7
 
 opencv-python
-pytesseract1
+pytesseract
