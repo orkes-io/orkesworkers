@@ -1,4 +1,4 @@
-conductor-python==v1.0.7
+conductor-python==v1.0.71
 
 opencv-python
 pytesseract
