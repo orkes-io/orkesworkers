@@ -1,6 +1,7 @@
 package io.orkes.samples.workers;
 
 import com.amazonaws.regions.Regions;
+import com.google.common.primitives.Doubles;
 import com.netflix.conductor.client.worker.Worker;
 import com.netflix.conductor.common.metadata.tasks.Task;
 import com.netflix.conductor.common.metadata.tasks.TaskResult;
@@ -29,8 +30,10 @@ public class ImageConvertResizeWorker implements Worker {
 
         try {
             String fileLocation = (String) task.getInputData().get("fileLocation");
-            Integer width = (Integer) task.getInputData().get("outputWidth");
-            Integer height = (Integer) task.getInputData().get("outputHeight");
+            Integer width = Doubles.tryParse(task.getInputData().get("outputWidth").toString()).intValue();
+
+            Integer height = Doubles.tryParse(task.getInputData().get("outputHeight").toString()).intValue();
+
 
             String outputFormat = (String) task.getInputData().get("outputFormat");
 
