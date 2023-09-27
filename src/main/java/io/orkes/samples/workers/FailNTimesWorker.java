@@ -28,6 +28,7 @@ public class FailNTimesWorker implements Worker {
         if(failedCount >= timesToFail) {
             result.addOutputData("outputVal", "This task completed failing for configured number of times - " + timesToFail);
             result.setStatus(TaskResult.Status.COMPLETED);
+            return result;
         }
         result.addOutputData("failedCount", ++failedCount);
         result.addOutputData("outputVal", "This task fails (for testing) for " + timesToFail + " times");
