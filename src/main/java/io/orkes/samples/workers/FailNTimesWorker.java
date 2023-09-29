@@ -6,10 +6,14 @@ import com.netflix.conductor.common.metadata.tasks.TaskResult;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Map;
 
 @Component
 public class FailNTimesWorker implements Worker {
+
+    public static final String ZONE = "America/Los_Angeles";
+
     @Override
     public String getTaskDefName() {
         return "fail_n_times";
@@ -18,10 +22,10 @@ public class FailNTimesWorker implements Worker {
     @Override
     public TaskResult execute(Task task) {
         TaskResult result = new TaskResult(task);
-        if(!task.isRetried()) {
-            result.addOutputData("initialStartTime", Instant.ofEpochMilli(task.getStartTime()).toString());
-            result.addOutputData("initialTaskExecutionTime", Instant.now().toString());
-            result.addOutputData("initialScheduledTime", Instant.ofEpochMilli(task.getScheduledTime()).toString());
+        if(task.getRetryCount() == 0) {
+            result.addOutputData("initialStartTime", Instant.ofEpochMilli(task.getStartTime()).atZone(ZoneId.of(ZONE)).toString());
+            result.addOutputData("initialTaskExecutionTime", Instant.now().atZone(ZoneId.of(ZONE)).toString());
+            result.addOutputData("initialScheduledTime", Instant.ofEpochMilli(task.getScheduledTime()).atZone(ZoneId.of(ZONE)).toString());
         }
         int timesToFail = getIntValue("timesToFail", 1, task.getInputData());
         int failedCount = getIntValue("failedCount", 0, task.getOutputData());
