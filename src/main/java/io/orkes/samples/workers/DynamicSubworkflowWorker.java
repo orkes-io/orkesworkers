@@ -44,7 +44,7 @@ public class DynamicSubworkflowWorker implements Worker {
         System.out.println("Starting dynamic_subworkflow_task");
         TaskResult result = new TaskResult(task);
         try {
-            result.setOutputData(startQuestWorkflow());
+            result.setOutputData(startExistingWorkflow());
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -52,7 +52,7 @@ public class DynamicSubworkflowWorker implements Worker {
         return result;
     }
 
-    public Map<String, Object> startQuestWorkflow() throws JsonProcessingException {
+    public Map<String, Object> startExistingWorkflow() throws JsonProcessingException {
         StartWorkflowRequest request = new StartWorkflowRequest();
         request.setName("dynamic_workflow");
         Map<String, Object> inputData = new HashMap<>();
