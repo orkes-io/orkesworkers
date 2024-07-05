@@ -7,7 +7,6 @@ import io.orkes.conductor.client.OrkesClients;
 import io.orkes.conductor.client.TaskClient;
 import io.orkes.conductor.client.WorkflowClient;
 import io.orkes.conductor.client.automator.TaskRunnerConfigurer;
-import io.orkes.conductor.client.http.OrkesIntegrationClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.SpringApplication;
@@ -67,31 +66,6 @@ public class OrkesWorkersApplication {
     }
 
     @Bean
-    public OrkesIntegrationClient orkesIntegrationClient() {
-        String rootUri = env.getProperty(CONDUCTOR_SERVER_URL);
-        String key = env.getProperty(CONDUCTOR_CLIENT_KEY_ID);
-        String secret = env.getProperty(CONDUCTOR_CLIENT_SECRET);
-
-        if ("_CHANGE_ME_".equals(key) || "_CHANGE_ME_".equals(secret)) {
-            log.error("Please provide an application key id and secret");
-            throw new RuntimeException("No Application Key");
-        }
-
-        ApiClient apiClient = null;
-
-        log.info("Conductor Server URL: {}", rootUri);
-        if(StringUtils.isNotBlank(key) && StringUtils.isNotBlank(secret)) {
-            log.info("Using Key and Secret to connect to the server");
-            apiClient = new ApiClient(rootUri, key, secret);
-        } else {
-            log.info("setCredentialsIfPresent: Proceeding without client authentication");
-            apiClient = new ApiClient(rootUri);
-        }
-        OrkesIntegrationClient orkesIntegrationClient = new OrkesIntegrationClient(apiClient);
-        return orkesIntegrationClient;
-    }
-
-    @Bean
     public TaskClient taskClient(OrkesClients orkesClients) {
         TaskClient taskClient = orkesClients.getTaskClient();
         return taskClient;
@@ -108,7 +82,7 @@ public class OrkesWorkersApplication {
         log.info("Starting workers : {}", workersList);
         TaskRunnerConfigurer runnerConfigurer = new TaskRunnerConfigurer
                 .Builder(taskClient, workersList)
-                .withThreadCount(Math.max(1, workersList.size() * 3))
+                .withThreadCount(Math.max(1, workersList.size()))
                 .build();
         runnerConfigurer.init();
         return runnerConfigurer;
