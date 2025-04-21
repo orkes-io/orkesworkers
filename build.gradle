@@ -7,7 +7,7 @@ plugins {
 ext {
     appVersion = '1.0-SNAPSHOT'
     versions = [
-            orkesClient: '1.0.2',
+            orkesClient: '2.1.2',
             guava      : '31.0.1-jre',
             im4java    : '1.4.0',
             log4j      : '2.17.1!!',
@@ -52,6 +52,7 @@ dependencies {
     implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.14'
     implementation group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4.16'
     implementation group: 'commons-io', name: 'commons-io', version: '2.7'
+    implementation "io.nats:jnats:2.17.2"
 
     implementation 'com.amazonaws:aws-java-sdk-s3'
     implementation 'com.amazonaws:aws-java-sdk-sts'

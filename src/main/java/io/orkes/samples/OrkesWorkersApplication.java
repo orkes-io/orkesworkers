@@ -1,6 +1,7 @@
 package io.orkes.samples;
 
 import com.netflix.conductor.client.worker.Worker;
+import com.netflix.conductor.sdk.workflow.executor.WorkflowExecutor;
 import io.orkes.conductor.client.ApiClient;
 import io.orkes.conductor.client.OrkesClients;
 import io.orkes.conductor.client.TaskClient;
@@ -116,6 +117,11 @@ public class OrkesWorkersApplication {
                 System.setProperty(k, v);
             }
         });
+    }
+
+    @Bean
+    public WorkflowExecutor workflowExecutor(OrkesClients orkesClients) {
+        return new WorkflowExecutor(taskClient(orkesClients), workflowClient(orkesClients), orkesClients.getMetadataClient(), 100);
     }
 
 }
