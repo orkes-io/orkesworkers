@@ -1,22 +1,22 @@
 package io.orkes.samples.workers;
 
-import com.netflix.conductor.client.worker.Worker;
-import com.netflix.conductor.common.metadata.tasks.Task;
-import com.netflix.conductor.common.metadata.tasks.TaskResult;
+import com.netflix.conductor.sdk.workflow.task.WorkerTask;
+import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
+import lombok.Data;
 
 @Component
-public class ReadNameWorker implements Worker {
-    @Override
-    public String getTaskDefName() {
-        return "Read_Name";
+public class ReadNameWorker {
+
+    @Data
+    public static class ReadNameInput {
+
     }
 
-    @Override
-    public TaskResult execute(Task task) {
-        TaskResult result = new TaskResult(task);
-        result.setStatus(TaskResult.Status.COMPLETED);
-        return result;
+    @WorkerTask("Read_Name")
+    @Tool(description = "Reads a name")
+    public void readName(
+            @ToolParam(description = "Input parameters for reading a name") ReadNameInput input) {
     }
-
 }

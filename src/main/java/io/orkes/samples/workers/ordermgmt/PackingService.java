@@ -1,20 +1,29 @@
 package io.orkes.samples.workers.ordermgmt;
 
-import com.netflix.conductor.client.worker.Worker;
-import com.netflix.conductor.common.metadata.tasks.Task;
-import com.netflix.conductor.common.metadata.tasks.TaskResult;
+import com.netflix.conductor.sdk.workflow.task.WorkerTask;
+import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
+import lombok.Data;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
-public class PackingService implements Worker {
-    @Override
-    public String getTaskDefName() {
-        return "request_pick_and_pack";
+public class PackingService {
+
+    @Data
+    public static class PackingServiceInput {
+        // Empty class as the original worker didn't use any inputs
+        // But maintained for consistency and potential future use
     }
 
-    @Override
-    public TaskResult execute(Task task) {
-        task.setStatus(Task.Status.COMPLETED);
-        return new TaskResult(task);
+    @WorkerTask("request_pick_and_pack")
+    @Tool(description = "Handles pick and pack requests for order fulfillment")
+    public Map<String, Object> executePickAndPack(
+            @ToolParam(description = "Input parameters for pick and pack request") PackingServiceInput input) {
+
+        // Since the original worker didn't do anything specific, we're keeping this simple
+        return new HashMap<>();
     }
 }

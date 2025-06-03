@@ -4,86 +4,83 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.netflix.conductor.client.worker.Worker;
-import com.netflix.conductor.common.metadata.tasks.Task;
-import com.netflix.conductor.common.metadata.tasks.TaskResult;
 import com.netflix.conductor.common.metadata.workflow.WorkflowTask;
+import com.netflix.conductor.sdk.workflow.task.WorkerTask;
+import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.ai.tool.annotation.ToolParam;
 import io.orkes.samples.utils.Size;
-import org.im4java.core.ConvertCmd;
-import org.im4java.core.IMOperation;
 import org.springframework.stereotype.Component;
+import lombok.Data;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Component
-public class ImageMultipleConvertResizeWorker implements Worker {
+public class ImageMultipleConvertResizeWorker {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
-
-    @Override
-    public String getTaskDefName() {
-        return "image_multiple_convert_resize";
+    @Data
+    public static class ImageMultipleConversionInput {
+        private String fileLocation;
+        private List<String> outputFormats;
+        private List<Size> outputSizes;
+        private Boolean maintainAspectRatio;
     }
 
-    @Override
-    public TaskResult execute(Task task) {
+    @WorkerTask("image_multiple_convert_resize")
+    @Tool(description = "Creates dynamic tasks for converting a single image to multiple formats and sizes")
+    public Map<String, Object> imageMultipleConvertResize(
+            @ToolParam(description = "Input parameters for multiple image conversion options") ImageMultipleConversionInput input) {
 
-        TaskResult result = new TaskResult(task);
+        Map<String, Object> result = new HashMap<>();
 
         try {
-            String fileLocation = (String) task.getInputData().get("fileLocation");
-            List<String> outputFormats = (List<String>)(task.getInputData().get("outputFormats"));
-            List<Size> outputSizes = (List<Size>) objectMapper.convertValue(task.getInputData().get("outputSizes"), new TypeReference<List<Size>>(){});
-            Boolean maintainAspectRatio = Boolean.valueOf(task.getInputData().get("maintainAspectRatio").toString());
-
-            List<WorkflowTask> dynamicTasks =  Lists.newArrayList();
+            List<WorkflowTask> dynamicTasks = Lists.newArrayList();
             Map<String, Object> dynamicTasksInput = Maps.newHashMap();
 
-            int i=0;
+            int i = 0;
             String dynamicTaskName = "image_convert_resize";
-            for (String outputFormat :
-                    outputFormats) {
-                for (Size size:
-                     outputSizes) {
-                    String taskRefName = String.format("%s_%s_%sx%s_%d",dynamicTaskName, outputFormat, size.width, size.height, i++);
+            for (String outputFormat : input.getOutputFormats()) {
+                for (Size size : input.getOutputSizes()) {
+                    String taskRefName = String.format("%s_%s_%sx%s_%d", dynamicTaskName, outputFormat, size.width, size.height, i++);
                     WorkflowTask dynamicTask = new WorkflowTask();
                     dynamicTask.setName(dynamicTaskName);
                     dynamicTask.setTaskReferenceName(taskRefName);
                     dynamicTasks.add(dynamicTask);
 
                     Map<String, Object> dynamicTaskInput = Maps.newHashMap();
-                    dynamicTaskInput.put("fileLocation", fileLocation);
+                    dynamicTaskInput.put("fileLocation", input.getFileLocation());
                     dynamicTaskInput.put("outputFormat", outputFormat);
                     dynamicTaskInput.put("outputWidth", size.width);
                     dynamicTaskInput.put("outputHeight", size.height);
-                    dynamicTaskInput.put("maintainAspectRatio", maintainAspectRatio);
+                    dynamicTaskInput.put("maintainAspectRatio", input.getMaintainAspectRatio());
 
-                    dynamicTasksInput.put(taskRefName,dynamicTaskInput );
+                    dynamicTasksInput.put(taskRefName, dynamicTaskInput);
                 }
             }
 
-
-            result.setStatus(TaskResult.Status.COMPLETED);
             String currentTimeOnServer = Instant.now().toString();
-            result.log("This is a test log at time: " + currentTimeOnServer);
-            result.addOutputData("dynamicTasks", dynamicTasks);
-            result.addOutputData("dynamicTasksInput", dynamicTasksInput);
+            // Include log in the output data
+            result.put("log", "This is a test log at time: " + currentTimeOnServer);
+            result.put("dynamicTasks", dynamicTasks);
+            result.put("dynamicTasksInput", dynamicTasksInput);
+
+            return result;
 
         } catch (Exception e) {
-            e.printStackTrace();
-            result.setStatus(TaskResult.Status.FAILED);
             final StringWriter sw = new StringWriter();
             final PrintWriter pw = new PrintWriter(sw, true);
             e.printStackTrace(pw);
-            result.log(sw.getBuffer().toString());
+
+            // Add error info to result
+            result.put("error", e.getMessage());
+            result.put("stackTrace", sw.getBuffer().toString());
+            throw new RuntimeException("Failed to prepare multiple image conversion tasks: " + e.getMessage(), e);
         }
-        return result;
     }
-
-
 }

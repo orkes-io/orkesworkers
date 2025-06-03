@@ -1,20 +1,26 @@
 package io.orkes.samples.workers.ordermgmt;
 
-import com.netflix.conductor.client.worker.Worker;
-import com.netflix.conductor.common.metadata.tasks.Task;
-import com.netflix.conductor.common.metadata.tasks.TaskResult;
+import com.netflix.conductor.sdk.workflow.task.WorkerTask;
+import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
+import lombok.Data;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
-public class SendEmail implements Worker {
-    @Override
-    public String getTaskDefName() {
-        return "send_email";
+public class SendEmail {
+
+    @Data
+    public static class SendEmailInput {
     }
 
-    @Override
-    public TaskResult execute(Task task) {
-        task.setStatus(Task.Status.COMPLETED);
-        return new TaskResult(task);
+    @WorkerTask("send_email")
+    @Tool(description = "Sends email notifications")
+    public Map<String, Object> executeSendEmail(
+            @ToolParam(description = "Input parameters for email sending") SendEmailInput input) {
+
+        return new HashMap<>();
     }
 }

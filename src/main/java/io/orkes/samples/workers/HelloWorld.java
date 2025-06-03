@@ -1,21 +1,25 @@
 package io.orkes.samples.workers;
-import com.netflix.conductor.client.worker.Worker;
-import com.netflix.conductor.common.metadata.tasks.Task;
-import com.netflix.conductor.common.metadata.tasks.TaskResult;
+
+import com.netflix.conductor.sdk.workflow.task.WorkerTask;
+import com.netflix.conductor.sdk.workflow.task.OutputParam;
+import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
+import lombok.Data;
 
 @Component
-public class HelloWorld implements Worker {
-    @Override
-    public String getTaskDefName() {
-        return "hello_world";
+public class HelloWorld {
+
+    // POJO for input parameters (empty as the original worker didn't use any inputs)
+    @Data
+    public static class HelloWorldInput {
+        // Empty class as no inputs were used in the original implementation
     }
 
-    @Override
-    public TaskResult execute(Task task) {
-        TaskResult result = new TaskResult(task);
-        result.addOutputData("hw_response", "Hello World!");
-        result.setStatus(TaskResult.Status.COMPLETED);
-        return result;
+    @WorkerTask("hello_world")
+    @Tool(description = "Returns a Hello World greeting")
+    public @OutputParam("hw_response") String helloWorld(
+            @ToolParam(description = "Input parameters") HelloWorldInput input) {
+        return "Hello World!";
     }
 }

@@ -1,7 +1,6 @@
 package io.orkes.samples.workers.ordermgmt;
 
 import com.netflix.conductor.sdk.workflow.task.WorkerTask;
-import io.modelcontextprotocol.spec.McpSchema;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
@@ -11,20 +10,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class BookFedex {
+public class RequestPickAndPack {
 
     @Data
-    public static class BookFedexInput {
+    public static class RequestPickAndPackInput {
         // Empty class as the original worker didn't use any inputs
         // But maintained for consistency and potential future use
     }
 
-    @WorkerTask("book_fedex")
-    @Tool(description = "Books a FedEx shipment")
-    public Map<String, Object> executeBookFedex(
-            @ToolParam(description = "Input parameters for FedEx booking") BookFedexInput input) {
+    @WorkerTask("request_pick_and_pack")
+    @Tool(description = "Handles pick and pack requests for order fulfillment")
+    public Map<String, Object> executeRequestPickAndPack(
+            @ToolParam(description = "Input parameters for pick and pack request") RequestPickAndPackInput input) {
 
-        //McpSchema.Tool
         // Since the original worker didn't do anything specific, we're keeping this simple
         return new HashMap<>();
     }

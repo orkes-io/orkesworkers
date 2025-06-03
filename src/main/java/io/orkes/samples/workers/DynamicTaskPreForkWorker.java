@@ -4,13 +4,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.netflix.conductor.client.worker.Worker;
-import com.netflix.conductor.common.metadata.tasks.Task;
-import com.netflix.conductor.common.metadata.tasks.TaskResult;
 import com.netflix.conductor.common.metadata.tasks.TaskType;
 import com.netflix.conductor.common.metadata.workflow.SubWorkflowParams;
 import com.netflix.conductor.common.metadata.workflow.WorkflowTask;
+import com.netflix.conductor.sdk.workflow.task.WorkerTask;
 import io.orkes.samples.utils.Size;
+import lombok.Data;
+import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
 
 import java.io.PrintWriter;
@@ -19,47 +20,48 @@ import java.net.URI;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 @Component
-public class DynamicTaskPreForkWorker implements Worker {
+public class DynamicTaskPreForkWorker {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
-
-    @Override
-    public String getTaskDefName() {
-        return "dynamic_task_prefork";
+    @Data
+    public static class DynamicTaskPreForkInput {
+        private List<Map<String, Object>> subWorkflowInputArray;
+        private String subWorkflowName;
+        private List<Map<String, Object>> taskInputs;
+        private String taskName;
+        private String taskType;
     }
 
-    @Override
-    public TaskResult execute(Task task) {
-        TaskResult result = new TaskResult(task);
+    @WorkerTask("dynamic_task_prefork")
+    @Tool(description = "Creates dynamic sub-workflow tasks based on input arrays")
+    public Map<String, Object> executeDynamicTaskPrefork(
+            @ToolParam(description = "Input parameters for dynamic task creation") DynamicTaskPreForkInput input) {
+
+        Map<String, Object> result = new HashMap<>();
 
         try {
+            List<Map<String, Object>> subWorkflowInputs = input.getSubWorkflowInputArray();
+            String subWorkflowName = input.getSubWorkflowName();
+            List<Map<String, Object>> taskInputs = input.getTaskInputs();
+            String taskName = input.getTaskName();
+            String taskType = input.getTaskType().toLowerCase();
 
-            List<Map<String, Object>> subWorkflowInputs = (List<Map<String, Object>>) task.getInputData().get("subWorkflowInputArray");
-            String subWorkflowName = (String)(task.getInputData().get("subWorkflowName"));
-
-            List<Map<String, Object>> taskInputs = (List<Map<String, Object>>) task.getInputData().get("taskInputs");
-            String taskName = (String)(task.getInputData().get("taskName"));
-
-            String taskType = ((String) task.getInputData().get("taskType")).toLowerCase();
             TaskType type = validateTaskTypes(taskType);
 
-
-            List<WorkflowTask> dynamicTasks =  Lists.newArrayList();
+            List<WorkflowTask> dynamicTasks = Lists.newArrayList();
             Map<String, Object> dynamicTasksInput = Maps.newHashMap();
 
-            int i=0;
+            int i = 0;
             String dynamicTaskName = subWorkflowName;
-            for (Map<String, Object> subWorkflowInput :
-                    subWorkflowInputs) {
-
-
-                String taskRefName = String.format("%s_%d",dynamicTaskName, i++);
+            for (Map<String, Object> subWorkflowInput : subWorkflowInputs) {
+                String taskRefName = String.format("%s_%d", dynamicTaskName, i++);
                 WorkflowTask dynamicTask = new WorkflowTask();
                 dynamicTask.setName(dynamicTaskName);
                 dynamicTask.setTaskReferenceName(taskRefName);
@@ -68,43 +70,40 @@ public class DynamicTaskPreForkWorker implements Worker {
                 subWorkflowParams.setName(subWorkflowName);
                 dynamicTask.setSubWorkflowParam(subWorkflowParams);
                 dynamicTasks.add(dynamicTask);
-                Map<String, Object> dynamicTaskInput = Maps.newHashMap();
 
-                for (String taskInputKey:
-                        subWorkflowInput.keySet()) {
+                Map<String, Object> dynamicTaskInput = Maps.newHashMap();
+                for (String taskInputKey : subWorkflowInput.keySet()) {
                     dynamicTaskInput.put(taskInputKey, subWorkflowInput.get(taskInputKey));
                 }
 
-
-
-                dynamicTasksInput.put(taskRefName,dynamicTaskInput);
+                dynamicTasksInput.put(taskRefName, dynamicTaskInput);
             }
 
-            result.setStatus(TaskResult.Status.COMPLETED);
-            result.addOutputData("dynamicTasks", dynamicTasks);
-            result.addOutputData("dynamicTasksInput", dynamicTasksInput);
+            result.put("dynamicTasks", dynamicTasks);
+            result.put("dynamicTasksInput", dynamicTasksInput);
 
         } catch (Exception e) {
             e.printStackTrace();
-            result.setStatus(TaskResult.Status.FAILED);
+
             final StringWriter sw = new StringWriter();
             final PrintWriter pw = new PrintWriter(sw, true);
             e.printStackTrace(pw);
-            result.log(sw.getBuffer().toString());
+
+            // Add error details to result
+            result.put("error", sw.getBuffer().toString());
+            throw new RuntimeException("Failed to create dynamic tasks: " + e.getMessage(), e);
         }
+
         return result;
     }
 
-
     public Set<TaskType> supportedTaskTypes = EnumSet.of(TaskType.SIMPLE, TaskType.SUB_WORKFLOW);
-
 
     private TaskType validateTaskTypes(String taskType) throws Exception {
         TaskType type = TaskType.of(taskType);
-        if(!supportedTaskTypes.contains(type)) {
+        if (!supportedTaskTypes.contains(type)) {
             throw new Exception("TaskType: " + taskType + " not supported. Supported types: " + supportedTaskTypes);
         }
         return type;
     }
-
 }

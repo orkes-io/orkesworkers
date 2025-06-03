@@ -1,60 +1,52 @@
 package io.orkes.samples.workers;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.netflix.conductor.client.worker.Worker;
-import com.netflix.conductor.common.metadata.tasks.Task;
-import com.netflix.conductor.common.metadata.tasks.TaskResult;
-import com.netflix.conductor.common.metadata.tasks.TaskType;
-import com.netflix.conductor.common.metadata.workflow.SubWorkflowParams;
 import com.netflix.conductor.common.metadata.workflow.WorkflowTask;
-import io.orkes.samples.utils.Size;
+import com.netflix.conductor.sdk.workflow.task.WorkerTask;
+import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
+import lombok.Data;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URI;
 import java.nio.file.Paths;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Component
-public class ImageEffectsPreForkWorker implements Worker {
+public class ImageEffectsPreForkWorker {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
-
-    @Override
-    public String getTaskDefName() {
-        return "image_effects_prefork";
+    @Data
+    public static class ImageEffectsInput {
+        private List<String> fileLocations;
+        private List<Map<String, Object>> recipeInfos;
     }
 
-    @Override
-    public TaskResult execute(Task task) {
+    @WorkerTask("image_effects_prefork")
+    @Tool(description = "Prepares dynamic tasks for applying effects to images")
+    public Map<String, Object> imageEffectsPreFork(
+            @ToolParam(description = "Input parameters for image effects") ImageEffectsInput input) {
 
-        TaskResult result = new TaskResult(task);
+        Map<String, Object> result = new HashMap<>();
 
         try {
-            List<String> fileLocations = (List<String>) task.getInputData().get("fileLocations");
-            List<Map<String, Object>> recipeInfos = (List<Map<String, Object>>) task.getInputData().get("recipeInfos");
-
-            List<WorkflowTask> dynamicTasks =  Lists.newArrayList();
+            List<WorkflowTask> dynamicTasks = Lists.newArrayList();
             Map<String, Object> dynamicTasksInput = Maps.newHashMap();
 
-            int i=0;
+            int i = 0;
             String dynamicTaskName = "image_effect";
-            for (String fileLocation :
-                    fileLocations) {
-
-                for (Map<String, Object> recipeInfo :
-                        recipeInfos) {
-
+            for (String fileLocation : input.getFileLocations()) {
+                for (Map<String, Object> recipeInfo : input.getRecipeInfos()) {
                     String recipe = (String) recipeInfo.get("recipe");
                     Map<String, Object> recipeParameters = (Map<String, Object>) recipeInfo.get("recipeParameters");
-
 
                     String fileName = Paths.get(new URI(fileLocation).getPath()).getFileName().toString();
                     String taskRefName = String.format("%s_%s_%s_%d", dynamicTaskName, fileName, recipe, i++);
@@ -72,22 +64,23 @@ public class ImageEffectsPreForkWorker implements Worker {
                 }
             }
 
-
-            result.setStatus(TaskResult.Status.COMPLETED);
             String currentTimeOnServer = Instant.now().toString();
-            result.log("This is a test log at time: " + currentTimeOnServer);
-            result.addOutputData("dynamicTasks", dynamicTasks);
-            result.addOutputData("dynamicTasksInput", dynamicTasksInput);
+            // We can't log directly, but we can include it in the output
+            result.put("log", "This is a test log at time: " + currentTimeOnServer);
+            result.put("dynamicTasks", dynamicTasks);
+            result.put("dynamicTasksInput", dynamicTasksInput);
+
+            return result;
 
         } catch (Exception e) {
-            e.printStackTrace();
-            result.setStatus(TaskResult.Status.FAILED);
             final StringWriter sw = new StringWriter();
             final PrintWriter pw = new PrintWriter(sw, true);
             e.printStackTrace(pw);
-            result.log(sw.getBuffer().toString());
-        }
-        return result;
-    }
 
+            // Add error info to result
+            result.put("error", e.getMessage());
+            result.put("stackTrace", sw.getBuffer().toString());
+            throw new RuntimeException("Failed to prepare image effects tasks: " + e.getMessage(), e);
+        }
+    }
 }

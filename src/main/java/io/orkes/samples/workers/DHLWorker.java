@@ -1,23 +1,15 @@
 package io.orkes.samples.workers;
 
-import com.netflix.conductor.client.worker.Worker;
-import com.netflix.conductor.common.metadata.tasks.Task;
-import com.netflix.conductor.common.metadata.tasks.TaskResult;
+import com.netflix.conductor.sdk.workflow.task.WorkerTask;
+import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DHLWorker implements Worker {
+public class DHLWorker {
 
-    @Override
-    public String getTaskDefName() {
-        return "ship_via_dhl";
+    @WorkerTask("ship_via_dhl")
+    @Tool(description = "Ship a package via DHL")
+    public void shipViaDHL() {
+
     }
-
-    @Override
-    public TaskResult execute(Task task) {
-        TaskResult result = new TaskResult(task);
-        result.setStatus(TaskResult.Status.COMPLETED);
-        return result;
-    }
-
 }
