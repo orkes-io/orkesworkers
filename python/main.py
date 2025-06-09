@@ -10,6 +10,8 @@ from typing import Dict
 from conductor.client.configuration.configuration import Configuration
 from conductor.client.configuration.settings.authentication_settings import AuthenticationSettings
 from conductor.client.worker.worker import Worker
+import threading
+import argparse
 
 # logging.disable(level=logging.DEBUG)
 
@@ -18,8 +20,17 @@ SECRET = 'conductor_security_client_secret'
 CONDUCTOR_SERVER_URL = 'conductor_server_url'
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--port", type=int, default=8000, help="Port for SSE transport")
+    args = parser.parse_args()
+
     task_handler = start_workers()
-    task_handler.join_processes()
+    worker_thread = threading.Thread(target=task_handler.join_processes)
+    worker_thread.daemon=True
+    worker_thread.start()
+
+    from workers.workers import mcp
+    mcp.run(transport="sse", port=args.port)
 
 
 def start_workers() -> TaskHandler:
