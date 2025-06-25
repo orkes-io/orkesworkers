@@ -6,18 +6,35 @@ import io.orkes.conductor.client.OrkesClients;
 import io.orkes.conductor.client.TaskClient;
 import io.orkes.conductor.client.WorkflowClient;
 import io.orkes.conductor.client.automator.TaskRunnerConfigurer;
+import io.orkes.samples.workers.AlwaysFailingTaskWorker;
+import io.orkes.samples.workers.DHLWorker;
+import io.orkes.samples.workers.DynamicTaskArrayPreForkWorker;
+import io.orkes.samples.workers.FedExWorker;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.ai.tool.ToolCallbackProvider;
+import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.ai.tool.method.MethodToolCallbackProvider;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 @Slf4j
 @SpringBootApplication
@@ -116,6 +133,27 @@ public class OrkesWorkersApplication {
                 System.setProperty(k, v);
             }
         });
+    }
+
+    @Bean
+    public ToolCallbackProvider weatherTools(AlwaysFailingTaskWorker worker, DHLWorker dhlWorker, DynamicTaskArrayPreForkWorker worker2, FedExWorker fedExWorker) {
+        return MethodToolCallbackProvider.builder().toolObjects(worker, dhlWorker, worker2, fedExWorker).build();
+    }
+
+    @Bean
+    public ToolCallbackProvider toolCallbackProvider(ApplicationContext context) {
+        // Get all beans that are annotated with @Component or @Service
+        List<Object> toolBeans = context.getBeansOfType(Object.class).values().stream()
+                .filter(bean -> {
+                    // Check for at least one @Tool method
+                    return Arrays.stream(bean.getClass().getMethods())
+                            .anyMatch(method -> method.isAnnotationPresent(Tool.class));
+                })
+                .collect(Collectors.toList());
+
+        return MethodToolCallbackProvider.builder()
+                .toolObjects(toolBeans.toArray())
+                .build();
     }
 
 }

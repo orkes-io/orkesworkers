@@ -1,46 +1,54 @@
 package io.orkes.samples.workers;
 
-import com.netflix.conductor.client.worker.Worker;
-import com.netflix.conductor.common.metadata.tasks.Task;
-import com.netflix.conductor.common.metadata.tasks.TaskResult;
+import com.netflix.conductor.sdk.workflow.task.WorkerTask;
+import lombok.Data;
+import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class FailNTimesWorker implements Worker {
+public class FailNTimesWorker {
 
     public static final String ZONE = "America/Los_Angeles";
 
-    @Override
-    public String getTaskDefName() {
-        return "fail_n_times";
+    @Data
+    public static class FailNTimesInput {
+        private int timesToFail = 1;
+        private int failedCount = 0;
+        private int retryCount = 0;
+        private long startTime;
+        private long scheduledTime;
     }
 
-    @Override
-    public TaskResult execute(Task task) {
-        TaskResult result = new TaskResult(task);
-        if(task.getRetryCount() == 0) {
-            result.addOutputData("initialStartTime", Instant.ofEpochMilli(task.getStartTime()).atZone(ZoneId.of(ZONE)).toString());
-            result.addOutputData("initialTaskExecutionTime", Instant.now().atZone(ZoneId.of(ZONE)).toString());
-            result.addOutputData("initialScheduledTime", Instant.ofEpochMilli(task.getScheduledTime()).atZone(ZoneId.of(ZONE)).toString());
-        }
-        int timesToFail = getIntValue("timesToFail", 1, task.getInputData());
-        int failedCount = getIntValue("failedCount", 0, task.getOutputData());
-        if(failedCount >= timesToFail) {
-            result.addOutputData("outputVal", "This task completed failing for configured number of times - " + timesToFail);
-            result.setStatus(TaskResult.Status.COMPLETED);
-            return result;
-        }
-        result.addOutputData("failedCount", ++failedCount);
-        result.addOutputData("outputVal", "This task fails (for testing) for " + timesToFail + " times");
-        result.setStatus(TaskResult.Status.FAILED);
-        return result;
-    }
+    @WorkerTask("fail_n_times")
+    @Tool(description = "A task that fails N times before succeeding, used for testing retry mechanisms")
+    public Map<String, Object> failNTimes(
+            @ToolParam(description = "Input parameters") FailNTimesInput input) {
 
-    private static int getIntValue(String paramName, int defaultValue, Map<String, Object> data) {
-        return ((Number) (data.getOrDefault(paramName, defaultValue))).intValue();
+        Map<String, Object> result = new HashMap<>();
+
+        if(input.getRetryCount() == 0) {
+            result.put("initialStartTime", Instant.ofEpochMilli(input.getStartTime()).atZone(ZoneId.of(ZONE)).toString());
+            result.put("initialTaskExecutionTime", Instant.now().atZone(ZoneId.of(ZONE)).toString());
+            result.put("initialScheduledTime", Instant.ofEpochMilli(input.getScheduledTime()).atZone(ZoneId.of(ZONE)).toString());
+        }
+
+        int failedCount = input.getFailedCount();
+
+        if(failedCount >= input.getTimesToFail()) {
+            result.put("outputVal", "This task completed failing for configured number of times - " + input.getTimesToFail());
+            return result; // Returns with success status
+        }
+
+        result.put("failedCount", ++failedCount);
+        result.put("outputVal", "This task fails (for testing) for " + input.getTimesToFail() + " times");
+
+        // Throw exception to indicate failure
+        throw new RuntimeException("Task failing as per configuration: " + failedCount + " of " + input.getTimesToFail() + " failures");
     }
 }

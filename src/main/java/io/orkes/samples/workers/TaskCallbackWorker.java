@@ -1,32 +1,48 @@
 package io.orkes.samples.workers;
 
-import com.netflix.conductor.client.worker.Worker;
-import com.netflix.conductor.common.metadata.tasks.Task;
-import com.netflix.conductor.common.metadata.tasks.TaskResult;
+import com.netflix.conductor.sdk.workflow.task.WorkerTask;
+import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
+import lombok.Data;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
-public class TaskCallbackWorker implements Worker {
-    @Override
-    public String getTaskDefName() {
-        return "test_task_callback";
+public class TaskCallbackWorker {
+
+    @Data
+    public static class TaskCallbackInput {
+        // Empty class as the original worker didn't use any inputs
+        // But maintained for consistency and potential future use
     }
 
     private AtomicInteger runCount = new AtomicInteger(0);
 
-    @Override
-    public TaskResult execute(Task task) {
-        TaskResult result = new TaskResult(task);
-        result.addOutputData("result" + runCount.incrementAndGet(), "Run Count: "  + runCount.get());
-        result.log("Running for " + runCount.get());
-        if(runCount.get() % 5 == 0) { // Check DB if things are completed
-            result.setStatus(TaskResult.Status.COMPLETED);
-        } else { // If still running then post updates
-            result.setStatus(TaskResult.Status.IN_PROGRESS);
-            result.setCallbackAfterSeconds(3);
+    @WorkerTask("test_task_callback")
+    @Tool(description = "A task that demonstrates callback functionality by incrementing a counter and completing after 5 runs")
+    public Map<String, Object> executeTaskCallback(
+            @ToolParam(description = "Input parameters") TaskCallbackInput input) {
+
+        Map<String, Object> result = new HashMap<>();
+
+        // Increment run count and add to output
+        int currentCount = runCount.incrementAndGet();
+        result.put("result" + currentCount, "Run Count: " + currentCount);
+
+        // Add log message to output
+        result.put("log", "Running for " + currentCount);
+
+        // Check if we should complete the task
+        if (currentCount % 5 == 0) {
+
+        } else {
+            result.put("taskStatus", "IN_PROGRESS");
+            result.put("callbackAfterSeconds", 3);
         }
+
         return result;
     }
 }

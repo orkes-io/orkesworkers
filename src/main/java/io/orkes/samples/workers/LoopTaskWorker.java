@@ -1,23 +1,33 @@
 package io.orkes.samples.workers;
 
-import com.netflix.conductor.client.worker.Worker;
-import com.netflix.conductor.common.metadata.tasks.Task;
-import com.netflix.conductor.common.metadata.tasks.TaskResult;
+import com.netflix.conductor.sdk.workflow.task.WorkerTask;
+import com.netflix.conductor.sdk.workflow.task.OutputParam;
+import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
+import lombok.Data;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
-public class LoopTaskWorker implements Worker {
-    @Override
-    public String getTaskDefName() {
-        return "first_task_in_loop";
+public class LoopTaskWorker {
+
+    @Data
+    public static class LoopTaskInput {
+        // Empty class as the original worker didn't use any inputs
+        // But maintained for consistency and potential future use
     }
 
-    @Override
-    public TaskResult execute(Task task) {
-        TaskResult result = new TaskResult(task);
-        result.addOutputData("outputVal", 1);
-        result.addOutputData("status", "COMPLETED_WITH_ERRORS");
-        result.setStatus(TaskResult.Status.COMPLETED);
+    @WorkerTask("first_task_in_loop")
+    @Tool(description = "Executes the first task in a loop operation")
+    public Map<String, Object> executeFirstTaskInLoop(
+            @ToolParam(description = "Input parameters") LoopTaskInput input) {
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("outputVal", 1);
+        result.put("status", "COMPLETED_WITH_ERRORS");
+
         return result;
     }
 }

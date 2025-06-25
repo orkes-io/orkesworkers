@@ -1,23 +1,23 @@
 package io.orkes.samples.workers;
 
-import com.netflix.conductor.client.worker.Worker;
-import com.netflix.conductor.common.metadata.tasks.Task;
-import com.netflix.conductor.common.metadata.tasks.TaskResult;
+import com.netflix.conductor.sdk.workflow.task.WorkerTask;
+import lombok.Data;
+import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FedExWorker implements Worker {
+public class FedExWorker {
 
-    @Override
-    public String getTaskDefName() {
-        return "ship_via_fedex";
+    @Data
+    public static class FedExInput {
+
     }
 
-    @Override
-    public TaskResult execute(Task task) {
-        TaskResult result = new TaskResult(task);
-        result.setStatus(TaskResult.Status.COMPLETED);
-        return result;
-    }
+    @WorkerTask("ship_via_fedex")
+    @Tool(description = "Ship a package via FedEx")
+    public void shipViaFedEx(
+            @ToolParam(description = "Input parameters") FedExInput input) {
 
+    }
 }

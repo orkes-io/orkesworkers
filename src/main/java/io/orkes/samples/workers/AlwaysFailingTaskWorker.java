@@ -1,22 +1,16 @@
 package io.orkes.samples.workers;
 
-import com.netflix.conductor.client.worker.Worker;
-import com.netflix.conductor.common.metadata.tasks.Task;
-import com.netflix.conductor.common.metadata.tasks.TaskResult;
+import com.netflix.conductor.sdk.workflow.task.OutputParam;
+import com.netflix.conductor.sdk.workflow.task.WorkerTask;
+import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AlwaysFailingTaskWorker implements Worker {
-    @Override
-    public String getTaskDefName() {
-        return "always_failing_task";
-    }
+public class AlwaysFailingTaskWorker {
 
-    @Override
-    public TaskResult execute(Task task) {
-        TaskResult result = new TaskResult(task);
-        result.addOutputData("outputVal", "This task always fails (for testing)");
-        result.setStatus(TaskResult.Status.FAILED);
-        return result;
+    @WorkerTask("always_failing_task")
+    @Tool(description = "A task that always fails (for testing purposes)")
+    public @OutputParam("outputVal") String executeAlwaysFailingTask() {
+        return "This task always fails (for testing)";
     }
 }

@@ -2,11 +2,13 @@ package io.orkes.samples.workers;
 
 import com.google.common.util.concurrent.Uninterruptibles;
 import io.orkes.conductor.client.TaskClient;
-import com.netflix.conductor.client.worker.Worker;
-import com.netflix.conductor.common.metadata.tasks.Task;
 import com.netflix.conductor.common.metadata.tasks.TaskResult;
-import lombok.extern.slf4j.Slf4j;
+import com.netflix.conductor.sdk.workflow.task.WorkerTask;
+import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -17,31 +19,43 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 @Slf4j
-public class LongRunningAsyncTaskWorker implements Worker {
+public class LongRunningAsyncTaskWorker {
 
     private TaskClient taskClient;
     private AtomicInteger integer = new AtomicInteger(0);
+    private Map<String, TaskResult> taskResultsDataStore = new HashMap<>();
 
     public LongRunningAsyncTaskWorker(TaskClient taskClient) {
         this.taskClient = taskClient;
     }
 
-    @Override
-    public String getTaskDefName() {
-        return "long_running_async_task";
+    @Data
+    public static class LongRunningTaskInput {
+        private String workflowInstanceId;
+        private String taskId;
+        private int retryCount;
     }
 
-    @Override
-    public TaskResult execute(Task task) {
+    @WorkerTask("long_running_async_task")
+    @Tool(description = "Executes a long running asynchronous task with periodic updates")
+    public Map<String, Object> longRunningAsyncTask(
+            @ToolParam(description = "Input parameters for long running async task") LongRunningTaskInput input) {
 
-        String key = task.getWorkflowInstanceId() + "-" + task.getTaskId();
+        String key = input.getWorkflowInstanceId() + "-" + input.getTaskId();
 
-        if(taskResultsDataStore.containsKey(key)) {
+        // Create result map
+        Map<String, Object> resultMap = new HashMap<>();
+
+        if (taskResultsDataStore.containsKey(key)) {
             log.info("Task is already in progress - {}", key);
-            return taskResultsDataStore.get(key);
+            TaskResult storedResult = taskResultsDataStore.get(key);
+            return storedResult.getOutputData();
         }
 
-        TaskResult result = new TaskResult(task);
+        // Create a TaskResult for internal tracking
+        TaskResult result = new TaskResult();
+        result.setTaskId(input.getTaskId());
+        result.setWorkflowInstanceId(input.getWorkflowInstanceId());
         result.setStatus(TaskResult.Status.IN_PROGRESS);
         result.setCallbackAfterSeconds(1200);
         result.getOutputData().clear();
@@ -49,8 +63,7 @@ public class LongRunningAsyncTaskWorker implements Worker {
         taskResultsDataStore.put(key, result);
 
         CompletableFuture.runAsync(() -> {
-
-            if(task.getRetryCount() > 1 && task.getRetryCount() % 3 == 0) {
+            if (input.getRetryCount() > 1 && input.getRetryCount() % 3 == 0) {
                 for (int i = 0; i < 10; i++) {
                     Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
                     TaskResult taskResult = taskResultsDataStore.get(key);
@@ -76,9 +89,12 @@ public class LongRunningAsyncTaskWorker implements Worker {
         });
 
         log.info("Returning result from main - {}", result);
-        return result;
+
+        // Signal that this is an IN_PROGRESS task that needs special handling
+        resultMap.put("taskStatus", "STARTED");
+        resultMap.put("_specialHandling", "IN_PROGRESS");
+        resultMap.put("_callbackAfterSeconds", 1200);
+
+        return resultMap;
     }
-
-    Map<String, TaskResult> taskResultsDataStore = new HashMap<>();
-
 }

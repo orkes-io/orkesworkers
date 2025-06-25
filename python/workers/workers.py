@@ -2,12 +2,25 @@ from conductor.client.http.models.task import Task
 from conductor.client.http.models.task_result import TaskResult
 from conductor.client.http.models.task_exec_log import TaskExecLog
 from conductor.client.http.models.task_result_status import TaskResultStatus
-
 from workers.utils.ocr import ocr
-
+from fastmcp import FastMCP
 import socket
 
+
+mcp = FastMCP("Conductor Workers")
+
+@mcp.tool()
+def hello_world() -> str:
+    """Simple hello world function"""
+    return "hello world"
+
+@mcp.tool()
+def extract_text_from_image(image_url: str) -> str:
+    """Extract text from image using OCR"""
+    return ocr(image_url)
+
 def python_helloworld(task: Task) -> TaskResult:
+    result = hello_world()
     task_result = to_task_result(task)
     task_result.logs.append(
         TaskExecLog(
@@ -15,11 +28,11 @@ def python_helloworld(task: Task) -> TaskResult:
         )
     )
     task_result.status = TaskResultStatus.COMPLETED
-    task_result.add_output_data('result', 'hello world')
+    task_result.add_output_data('result', result)
     return task_result
 
 def python_ocr(task: Task) -> TaskResult:
-    ocr_result = ocr(task.input_data["image_url"])
+    result = extract_text_from_image(task.input_data["image_url"])
     task_result = to_task_result(task)
     task_result.logs.append(
         TaskExecLog(
@@ -27,7 +40,7 @@ def python_ocr(task: Task) -> TaskResult:
         )
     )
     task_result.status = TaskResultStatus.COMPLETED
-    task_result.add_output_data('result', ocr_result)
+    task_result.add_output_data('result', result)
     return task_result
 
 
