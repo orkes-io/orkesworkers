@@ -6,7 +6,7 @@ import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AlwaysFailingTaskWorker implements MCPTool {
+public class AlwaysFailingTaskWorker {
 
     @WorkerTask("always_failing_task")
     @Tool(description = "A task that always fails (for testing purposes)")
