@@ -14,11 +14,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: "temurin"
-          java-version: "17"
+          java-version: "21"
 
       - name: Cache Gradle
         uses: actions/cache@v4
@@ -26,27 +26,22 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*gradle*', '**/gradle.properties', '**/*gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-gradle-8.5-${{ hashFiles('**/*gradle*', '**/gradle.properties', '**/*gradle-wrapper.properties') }}
           restore-keys: |
+            ${{ runner.os }}-gradle-8.5-
             ${{ runner.os }}-gradle-
 
       - name: Execution permissions for Gradle wrapper
         run: chmod +x gradlew
 
-      - name: Clean corrupted Gradle cache
-        run: |
-          rm -rf ~/.gradle/caches/jars-* || true
-          rm -rf ~/.gradle/caches/modules-*/files-* || true
-          rm -rf ~/.gradle/caches/*/generated-gradle-jars || true
-
       - name: Spotless Check
-        run: ./gradlew spotlessCheck --continue --no-daemon --refresh-dependencies
+        run: ./gradlew spotlessCheck --continue 
         continue-on-error: true
 
       - name: PMD Main Check
-        run: ./gradlew pmdMain --continue --no-daemon
+        run: ./gradlew pmdMain --continue 
         continue-on-error: true
 
       - name: PMD Test Check
-        run: ./gradlew pmdTest --continue --no-daemon
+        run: ./gradlew pmdTest --continue 
         continue-on-error: true
