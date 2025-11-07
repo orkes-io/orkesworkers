@@ -8,7 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @ToString
 public class ThumbnailInfo {
-    String fileLocation;
-    Long pts;
-    Double pts_time;
+  String fileLocation;
+  Long pts;
+  Double pts_time;
 }

@@ -138,4 +138,3 @@ pmd {
     ruleSetFiles = files("pmd-ruleset.xml")
     rulesMinimumPriority = 5
 }
-
