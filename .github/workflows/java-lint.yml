@@ -33,14 +33,20 @@ jobs:
       - name: Execution permissions for Gradle wrapper
         run: chmod +x gradlew
 
+      - name: Clean corrupted Gradle cache
+        run: |
+          rm -rf ~/.gradle/caches/jars-* || true
+          rm -rf ~/.gradle/caches/modules-*/files-* || true
+          rm -rf ~/.gradle/caches/*/generated-gradle-jars || true
+
       - name: Spotless Check
-        run: ./gradlew spotlessCheck --continue
+        run: ./gradlew spotlessCheck --continue --no-daemon --refresh-dependencies
         continue-on-error: true
 
       - name: PMD Main Check
-        run: ./gradlew pmdMain --continue
+        run: ./gradlew pmdMain --continue --no-daemon
         continue-on-error: true
 
       - name: PMD Test Check
-        run: ./gradlew pmdTest --continue        
+        run: ./gradlew pmdTest --continue --no-daemon
         continue-on-error: true
